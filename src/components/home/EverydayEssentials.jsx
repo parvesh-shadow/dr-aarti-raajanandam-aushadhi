@@ -1,92 +1,18 @@
 import TitleDescription from "@/components/shared/TitleDescription";
 import Slider from "@/components/shared/Slider";
 import Product from "@/components/shared/Product";
-import image1 from "@/assets/product1.jpg";
-import image2 from "@/assets/product2.jpg";
-import image3 from "@/assets/product3.jpg";
+import { getActiveProducts } from "@/lib/getProducts";
+import { toCardProduct } from "@/lib/productView";
 
-const PRODUCTS = [
-  {
-    id: 1,
-    category: "Ayurvedic Hair Care",
-    name: "Root Tricks Hair Care Capsule",
-    description:
-      "Ayurvedic hair care capsules formulated for a convenient daily wellness routine.",
-    pack: "800 mg • 60 Capsules",
-    price: 895,
-    rating: 4.8,
-    inStock: true,
-    image: image1,
-    href: "/checkout",
-  },
-  {
-    id: 2,
-    category: "Women’s Wellness",
-    name: "Fem Rasayan Tablets",
-    description:
-      "Ayurvedic wellness formula presented for women’s reproductive wellness and everyday care.",
-    pack: "60 Tablets",
-    price: 999,
-    rating: 4.8,
-    inStock: true,
-    image: image2,
-    href: "/checkout",
-  },
-  {
-    id: 3,
-    category: "Ayurvedic Wellness",
-    name: "Shatavar™ Tablets",
-    description:
-      "Ayurvedic medicine formulated with Shatavari, presented in a convenient tablet format for everyday wellness.",
-    pack: "800 mg • 60 Tablets",
-    price: 895,
-    rating: 4.8,
-    inStock: true,
-    image: image3,
-    href: "/checkout",
-  },
-  {
-    id: 4,
-    category: "Ayurvedic Hair Care",
-    name: "Root Tricks Hair Care Capsule",
-    description:
-      "Ayurvedic hair care capsules formulated for a convenient daily wellness routine.",
-    pack: "800 mg • 60 Capsules",
-    price: 895,
-    rating: 4.8,
-    inStock: true,
-    image: image1,
-    href: "/checkout",
-  },
-  {
-    id: 5,
-    category: "Women’s Wellness",
-    name: "Fem Rasayan Tablets",
-    description:
-      "Ayurvedic wellness formula presented for women’s reproductive wellness and everyday care.",
-    pack: "60 Tablets",
-    price: 999,
-    rating: 4.8,
-    inStock: true,
-    image: image2,
-    href: "/checkout",
-  },
-  {
-    id: 6,
-    category: "Ayurvedic Wellness",
-    name: "Shatavar™ Tablets",
-    description:
-      "Ayurvedic medicine formulated with Shatavari, presented in a convenient tablet format for everyday wellness.",
-    pack: "800 mg • 60 Tablets",
-    price: 895,
-    rating: 4.8,
-    inStock: true,
-    image: image3,
-    href: "/checkout",
-  },
-];
+const LIMIT = 10;
 
-export default function EverydayEssentials() {
+// Admin panel ke latest active products (max 10), DB se.
+export default async function EverydayEssentials() {
+  const products = (await getActiveProducts({ limit: LIMIT })).map(toCardProduct);
+
+  // Koi product nahi hai to section hi nahi dikhega
+  if (products.length === 0) return null;
+
   return (
     <section
       aria-labelledby="essentials-heading"
@@ -101,7 +27,7 @@ export default function EverydayEssentials() {
       />
 
       <Slider label="Featured products" className="mt-10">
-        {PRODUCTS.map((product) => (
+        {products.map((product) => (
           <Product key={product.id} product={product} />
         ))}
       </Slider>

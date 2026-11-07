@@ -3,25 +3,49 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
 
 // Image mil jaye to yahan path daalo, e.g. "/login-banner.jpg"
-const LOGIN_IMAGE = "/authImage.jpg";
+const LOGIN_IMAGE = "/authimage.jpg";
 
 const INPUT_CLASS =
   "mt-0.5 w-full border border-gray-200 bg-gray-100 px-4 py-3 text-xs text-black placeholder:text-gray-500 focus:border-[#C5A84C] focus:outline-none focus:ring-1 focus:ring-[#C5A84C] sm:text-sm";
 const LABEL_CLASS = "block text-sm font-medium text-black sm:text-base";
 
 export default function LoginForm({ className = "" }) {
+  const router = useRouter();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: yahan login API call lagao
-    console.log({ identifier, password });
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/user-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifier, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        router.push("/account");
+        router.refresh();
+      } else {
+        setError(data.error || "Login failed. Please try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,13 +111,20 @@ export default function LoginForm({ className = "" }) {
             </div>
           </div>
 
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
+
           <div className="space-y-3 pt-2">
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs font-medium uppercase tracking-wide text-white transition-colors hover:bg-[#A88C35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A88C35] sm:text-sm"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs font-medium uppercase tracking-wide text-white transition-colors hover:bg-[#A88C35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A88C35] disabled:opacity-60 sm:text-sm"
             >
-              Sign in
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              {loading ? "Please wait..." : "Sign in"}
+              {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
             </button>
 
             <Link

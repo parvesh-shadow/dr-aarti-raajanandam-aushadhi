@@ -1,7 +1,7 @@
 import { BookOpen, Clock, User } from "lucide-react";
 
 export default function BlogContent({ post }) {
-  const { content, category, readTime, author } = post;
+  const { html = "", category, readTime = "", author } = post;
 
   const details = [
     { icon: BookOpen, label: "Category", value: category },
@@ -19,38 +19,10 @@ export default function BlogContent({ post }) {
       className="mx-auto grid  gap-8  py-8  sm:py-12 lg:grid-cols-[1fr_336px] px-4 sm:px-6 lg:px-8 lg:px-20 xl:px-40"
     >
       {/* Article */}
-      <article className="space-y-6">
-        {content.map((section) => (
-          <div key={section.heading}>
-            <h2 className="text-[24px] font-medium text-gray-800">
-              {section.heading}
-            </h2>
-
-            {section.paragraphs?.map((text) => (
-              <p
-                key={text}
-                className="mt-3 text-sm text-gray-800 sm:text-[17px]"
-              >
-                {text}
-              </p>
-            ))}
-
-            {section.listIntro && (
-              <p className="mt-4 text-base text-gray-800 sm:text-lg">
-                {section.listIntro}
-              </p>
-            )}
-
-            {section.list && (
-              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-gray-800 sm:text-base">
-                {section.list.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ))}
-      </article>
+      <article
+        className="blog-content"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
 
       {/* Sidebar */}
       <aside className="h-fit border  border-gray-200 bg-white p-4 sm:p-5">

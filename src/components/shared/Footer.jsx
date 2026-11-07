@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import logo from "@/assets/logo.svg";
+import SocialIcon from "@/components/shared/SocialIcon";
+import { platformLabel } from "@/lib/socials";
 
 // ---------- Static content (footer sab jagah same) ----------
 const TAGLINE =
@@ -13,8 +15,6 @@ const NEWSLETTER_TITLE = "Stay in touch";
 const NEWSLETTER_TEXT = "Receive seasonal wisdom, rituals and product notes.";
 const ADDRESS =
   "Shop No. 12, Anand Wellness Plaza, MG Road, Near City Hospital, Pune, Maharashtra – 411001, India";
-const PHONE = "+91 98765 43210";
-const EMAIL = "info@raajanandamaushadhi.com";
 
 const COLUMNS = [
   {
@@ -39,93 +39,50 @@ const COLUMNS = [
     title: "My account",
     links: [
       { label: "My Profile", href: "/account" },
-      { label: "My Orders", href: "/account/orders" },
-      { label: "Order History", href: "/account/order-history" },
-      { label: "Saved Addresses", href: "/account/addresses" },
+      { label: "My Orders", href: "/account/order" },
+      // { label: "Order History", href: "/account/order" },
+      { label: "Saved Addresses", href: "/account/address" },
       { label: "My Appointments", href: "/account/appointments" },
-      { label: "Wishlist", href: "/account/wishlist" },
+      { label: "Wishlist", href: "/wishlist" },
     ],
-  },
-];
-
-// Social icons (lucide ke naye version me brand icons nahi hote, isliye inline SVG)
-const SOCIALS = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/raajanandam_aushadhi",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
-      </svg>
-    ),
-  },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-      </svg>
-    ),
-  },
-  {
-    label: "YouTube",
-    href: "https://www.youtube.com",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-      </svg>
-    ),
-  },
-  {
-    label: "X (Twitter)",
-    href: "https://x.com",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-        aria-hidden="true"
-      >
-        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-      </svg>
-    ),
   },
 ];
 
 const linkClass =
   "text-xs text-white transition-colors hover:text-[#C5A84C] active:text-[#A88C35] sm:text-sm";
 
-export default function Footer() {
+// phone, email, socials admin (Site Settings) se aate hain
+export default function Footer({ phone = "", email = "", socials = [] }) {
   const [subscribeEmail, setSubscribeEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [sending, setSending] = useState(false);
+  const [subError, setSubError] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: newsletter API baad me jodenge
-    setSubscribed(true);
-    setSubscribeEmail("");
+    if (sending) return;
+    setSending(true);
+    setSubError("");
+    setSubscribed(false);
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: subscribeEmail }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubError(d.error || "Could not subscribe. Please try again.");
+        return;
+      }
+      setSubscribed(true);
+      setSubscribeEmail("");
+    } catch {
+      setSubError("Network error. Please try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -173,18 +130,25 @@ export default function Footer() {
                 onChange={(e) => {
                   setSubscribeEmail(e.target.value);
                   setSubscribed(false);
+                  setSubError("");
                 }}
                 placeholder="Your email address"
                 className="w-full bg-transparent py-2 text-sm text-white placeholder:text-white focus:outline-none"
               />
               <button
                 type="submit"
+                disabled={sending}
                 aria-label="Subscribe"
                 className="pl-2 text-white transition-colors hover:text-[#C5A84C] active:text-[#A88C35]"
               >
                 <ArrowRight className="h-6 w-6" aria-hidden="true" />
               </button>
             </form>
+            {subError && (
+              <p role="alert" className="mt-2 text-xs text-red-400 xl:text-sm">
+                {subError}
+              </p>
+            )}
             {subscribed && (
               <p
                 role="status"
@@ -201,24 +165,28 @@ export default function Footer() {
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               <span>{ADDRESS}</span>
             </li>
-            <li className="flex items-center gap-3">
-              <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <a
-                href={`tel:${PHONE.replace(/\s/g, "")}`}
-                className="transition-colors hover:text-[#C5A84C]"
-              >
-                {PHONE}
-              </a>
-            </li>
-            <li className="flex items-center gap-3">
-              <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <a
-                href={`mailto:${EMAIL}`}
-                className="break-all transition-colors hover:text-[#C5A84C]"
-              >
-                {EMAIL}
-              </a>
-            </li>
+            {phone && (
+              <li className="flex items-center gap-3">
+                <Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <a
+                  href={`tel:${phone.replace(/[\s()-]/g, "")}`}
+                  className="transition-colors hover:text-[#C5A84C]"
+                >
+                  {phone}
+                </a>
+              </li>
+            )}
+            {email && (
+              <li className="flex items-center gap-3">
+                <Mail className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <a
+                  href={`mailto:${email}`}
+                  className="break-all transition-colors hover:text-[#C5A84C]"
+                >
+                  {email}
+                </a>
+              </li>
+            )}
           </ul>
         </div>
 
@@ -229,16 +197,16 @@ export default function Footer() {
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-8 xl:px-20">
           {/* Column 1: Social icons (mobile par row, sm+ par column) */}
           <ul className="col-span-2 flex gap-5 sm:col-span-1 sm:flex-col sm:gap-5">
-            {SOCIALS.map(({ label, href, icon }) => (
-              <li key={label}>
+            {socials.map(({ platform, url }, i) => (
+              <li key={`${platform}-${i}`}>
                 <a
-                  href={href}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={label}
+                  aria-label={platformLabel(platform)}
                   className="inline-flex transition-colors hover:text-[#C5A84C] active:text-[#A88C35]"
                 >
-                  {icon}
+                  <SocialIcon platform={platform} />
                 </a>
               </li>
             ))}

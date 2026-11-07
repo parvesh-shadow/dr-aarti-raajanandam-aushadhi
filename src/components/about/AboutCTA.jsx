@@ -1,27 +1,26 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
-
-const IMAGE = "/cta.jpg";
+import ctaImg from "@/assets/ayurvedic.webp";
 
 export default function AboutCTA() {
   return (
     <section
       aria-labelledby="about-cta-heading"
-      className="relative overflow-hidden bg-white lg:max-h-[500px]"
+      className="relative overflow-hidden bg-white"
     >
-      {/* Image: mobile/tablet me poori dikhegi (no crop), desktop me background */}
-      <div className="relative aspect-[1440/497] w-full lg:absolute lg:inset-0 lg:aspect-auto lg:h-full">
-        <ImagePlaceholder
-          src={IMAGE}
-          label="Products image"
-          sizes="100vw"
-          className="h-full w-full object-cover"
-        />
-      </div>
+      {/* Image: sabhi screens par background, card uske andar */}
+      <Image
+        src={ctaImg}
+        alt="Products image"
+        fill
+        quality={90}
+        sizes="100vw"
+        className="object-cover object-[center_40%]"
+      />
 
-      {/* Content */}
-      <div className="relative mx-auto flex max-w-7xl justify-end px-0 lg:min-h-[400px] lg:max-h-[500px] lg:items-center lg:px-8 lg:py-10">
+      {/* Content: image ke andar. Section ki height card se banti hai */}
+      <div className="relative mx-auto flex max-w-7xl items-center justify-end px-4 py-8 sm:px-6 sm:py-10 lg:min-h-[400px] lg:px-8 lg:py-10">
         <div className="w-full bg-white p-5 sm:p-8 lg:max-w-md lg:shadow-lg">
           <h2
             id="about-cta-heading"

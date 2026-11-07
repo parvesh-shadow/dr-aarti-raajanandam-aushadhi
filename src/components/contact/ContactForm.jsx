@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowRight, Mail, Phone } from "lucide-react";
+import { handleFromUrl } from "@/lib/socials";
 
 const ENQUIRY_TYPES = [
   "Product enquiry",
@@ -74,29 +75,47 @@ function FieldError({ id, message }) {
   );
 }
 
-export default function ContactForm() {
+// phone, email, instagramUrl admin (Site Settings) se aate hain
+export default function ContactForm({ phone = "", email = "", instagramUrl = "" }) {
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     // Type karte hi us field ka error hata do
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-    setSuccess(false);
+    setSuccess("");
+    setSubmitError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     const found = validate(values);
     setErrors(found);
+    if (Object.keys(found).length > 0) return;
 
-    if (Object.keys(found).length === 0) {
-      // TODO: backend/API yahan jodenge. Abhi sirf console me data.
-      console.log("Contact form:", values);
-      setSuccess(true);
+    setSubmitting(true);
+    setSuccess("");
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+      setSuccess(data.message || "Thank you. We have received your request.");
       setValues(INITIAL);
+    } catch (err) {
+      setSubmitError(err instanceof TypeError ? "Network error. Please check your connection." : err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -121,44 +140,50 @@ export default function ContactForm() {
           >
             Contact details
           </h2>
-          <li className="max-w-sm border-b border-gray-200 pb-5">
-            <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
-              <Phone className="h-5 w-5" aria-hidden="true" />
-              Call Us
-            </div>
-            <a
-              href="tel:+919876543210"
-              className=" block xl:text-[18px] text-base-800 sm:text-base font-semibold  text-sm transition-colors hover:text-[#A88C35]"
-            >
-              +91 98765 43210
-            </a>
-          </li>
-          <li className=" max-w-sm border-b border-gray-200 pb-5">
-            <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
-              <Mail className="h-5 w-5" aria-hidden="true" />
-              Email Us
-            </div>
-            <a
-              href="mailto:raajanandamofficial@gmail.com"
-              className=" block break-all xl:text-[18px] text-base-800 sm:text-base font-semibold  text-sm transition-colors hover:text-[#A88C35]"
-            >
-              raajanandamofficial@gmail.com
-            </a>
-          </li>
-          <li>
-            <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
-              <InstagramIcon className="h-5 w-5" />
-              Instagram ID
-            </div>
-            <a
-              href="https://www.instagram.com/raajanandam_aushadhi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className=" block xl:text-[18px] text-base-800 sm:text-base text-sm font-semibold transition-colors hover:text-[#A88C35]"
-            >
-              @raajanandam_aushadhi
-            </a>
-          </li>
+          {phone && (
+            <li className="max-w-sm border-b border-gray-200 pb-5">
+              <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
+                <Phone className="h-5 w-5" aria-hidden="true" />
+                Call Us
+              </div>
+              <a
+                href={`tel:${phone.replace(/[\s()-]/g, "")}`}
+                className=" block xl:text-[18px] text-base-800 sm:text-base font-semibold  text-sm transition-colors hover:text-[#A88C35]"
+              >
+                {phone}
+              </a>
+            </li>
+          )}
+          {email && (
+            <li className=" max-w-sm border-b border-gray-200 pb-5">
+              <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
+                <Mail className="h-5 w-5" aria-hidden="true" />
+                Email Us
+              </div>
+              <a
+                href={`mailto:${email}`}
+                className=" block break-all xl:text-[18px] text-base-800 sm:text-base font-semibold  text-sm transition-colors hover:text-[#A88C35]"
+              >
+                {email}
+              </a>
+            </li>
+          )}
+          {instagramUrl && (
+            <li>
+              <div className="flex items-center gap-3 xl:text-[18px] text-base-800 sm:text-base text-sm">
+                <InstagramIcon className="h-5 w-5" />
+                Instagram ID
+              </div>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className=" block xl:text-[18px] text-base-800 sm:text-base text-sm font-semibold transition-colors hover:text-[#A88C35]"
+              >
+                {handleFromUrl(instagramUrl)}
+              </a>
+            </li>
+          )}
         </ul>
 
         {/* Right: form */}
@@ -291,17 +316,18 @@ export default function ContactForm() {
 
           <button
             type="submit"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+            disabled={submitting}
+            className="disabled:opacity-60 mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
           >
             SUBMIT
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
 
           {success && (
-            <p role="status" className="mt-3 text-xs text-[#A88C35] sm:text-sm">
-              Thank you. Your message has been sent. Our team will get back to
-              you soon.
-            </p>
+            <p role="status" className="mt-3 text-xs text-[#A88C35] sm:text-sm">{success}</p>
+          )}
+          {submitError && (
+            <p role="alert" className="mt-3 text-xs text-red-600 sm:text-sm">{submitError}</p>
           )}
         </form>
       </div>

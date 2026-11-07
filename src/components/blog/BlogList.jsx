@@ -2,26 +2,20 @@
 
 import { useState } from "react";
 import BlogCard from "@/components/shared/BlogCard";
-import { POSTS } from "@/data/blogs";
 
-const FILTERS = [
-  "All",
-  "Ayurvedic Wellness",
-  "Daily Self-Care",
-  "Product Education",
-  "Herbal Ingredients",
-];
+// Filters ab blogs ki categories se bante hain (admin me nayi category dalo to wo bhi aa jaati hai)
 
 const PER_PAGE = 8;
 
-export default function BlogList() {
+export default function BlogList({ posts = [] }) {
+  const FILTERS = ["All", ...new Set(posts.map((p) => p.category).filter(Boolean))];
   const [activeFilter, setActiveFilter] = useState("All");
   const [page, setPage] = useState(1);
 
   const filtered =
     activeFilter === "All"
-      ? POSTS
-      : POSTS.filter((post) => post.category === activeFilter);
+      ? posts
+      : posts.filter((post) => post.category === activeFilter);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const visible = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -73,7 +67,9 @@ export default function BlogList() {
         </ul>
       ) : (
         <p className="mt-10 text-center text-xs text-gray-800 sm:text-sm">
-          No articles found in this category.
+          {posts.length === 0
+            ? "No articles published yet. Please check back soon."
+            : "No articles found in this category."}
         </p>
       )}
 

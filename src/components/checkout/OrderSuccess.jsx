@@ -20,8 +20,8 @@ export default function OrderSuccess({ orderNumber = "RAA-ORDER-XXXX" }) {
         </h2>
 
         <p className="mx-auto mt-3 max-w-sm text-xs text-gray-800 sm:text-sm">
-          Your payment has been verified. Your order confirmation and next steps
-          are shown below.
+          Your order has been placed. Please keep the amount ready and pay in
+          cash when it is delivered.
         </p>
 
         <p className="mt-5 text-xs text-black sm:text-sm xl:text-base">Order Number</p>

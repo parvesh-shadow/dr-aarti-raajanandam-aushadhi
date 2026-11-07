@@ -21,6 +21,7 @@ export default function ImagePlaceholder({
           fill
           priority={priority}
           sizes={sizes}
+          unoptimized={typeof src === "string" && (src.startsWith("/api/uploads/") || /^https?:\/\//.test(src))}
           className={imageClassName}
         />
       ) : (

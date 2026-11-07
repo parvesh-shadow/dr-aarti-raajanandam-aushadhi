@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import TitleDescription from "@/components/shared/TitleDescription";
 import instagramPreview from "@/assets/instaimage.jpg";
-
-const INSTAGRAM_URL = "https://www.instagram.com/raajanandam_aushadhi";
+import { findSocial, getSiteSettings } from "@/lib/siteSettings";
 
 function InstagramIcon({ className }) {
   return (
@@ -25,7 +24,11 @@ function InstagramIcon({ className }) {
   );
 }
 
-export default function Instagram() {
+export default async function Instagram() {
+  const instagramUrl = findSocial(await getSiteSettings(), "instagram")?.url;
+  // Admin ne Instagram link nahi diya to ye section nahi dikhega
+  if (!instagramUrl) return null;
+
   return (
     <section
       aria-labelledby="instagram-heading"
@@ -50,7 +53,7 @@ export default function Instagram() {
 
       <div className="mt-8 flex justify-center">
         <Link
-          href={INSTAGRAM_URL}
+          href={instagramUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 border border-black bg-white px-5 py-2.5 font-medium text-xs text-black transition-colors hover:border-[#A88C35] hover:bg-[#C5A84C] hover:text-white active:bg-[#A88C35] sm:text-sm"

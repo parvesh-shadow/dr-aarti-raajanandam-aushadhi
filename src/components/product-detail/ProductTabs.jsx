@@ -81,7 +81,7 @@ export default function ProductTabs({ product, className = "" }) {
               Product Specifications
             </h2>
             <dl className="mt-4 space-y-4">
-              {specs.map(([label, value], i) => (
+            {specs.map(({ label, value }, i) => (
                 <div
                   key={`${label}-${i}`}
                   className="grid grid-cols-2 gap-3 text-xs sm:text-sm"

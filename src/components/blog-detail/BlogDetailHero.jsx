@@ -1,12 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Share2 } from "lucide-react";
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
 
 export default function BlogDetailHero({ post }) {
   const { category, title, date, readTime, image } = post;
   const shareHref = `https://wa.me/?text=${encodeURIComponent(title)}`;
-  const BlogDetailHero="/blogdetail.jpg";
 
   return (
     <section
@@ -40,26 +38,16 @@ export default function BlogDetailHero({ post }) {
         </Link>
       </div>
 
-      {/* Small screen: image apni natural height me. md+: height 370px fixed (isse zyada nahi) */}
-      <div className="mt-6 w-full overflow-hidden bg-gray-200 md:h-[370px]">
-        {image ? (
-          <Image
-            src={BlogDetailHero}
-            alt={title}
-            width={1600}
-            height={700}
-            priority
-            sizes="(min-width: 1024px) 1000px, 100vw"
-            className="h-auto w-full md:h-full md:object-cover md:object-center"
-          />
-        ) : (
-          <div className="relative aspect-[16/7] w-full md:aspect-auto md:h-full">
-            <ImagePlaceholder
-              label="Blog image"
-              className="absolute inset-0"
-            />
-          </div>
-        )}
+      {/* Image: mobile par 16:7 ratio, md+ par height 370px */}
+      <div className="relative mt-6 aspect-[16/7] w-full overflow-hidden bg-gray-200 md:aspect-auto md:h-[370px]">
+        <ImagePlaceholder
+          src={image}
+          alt={title}
+          label="Blog image"
+          priority
+          sizes="(min-width: 1024px) 1000px, 100vw"
+          className="h-full w-full"
+        />
       </div>
     </section>
   );

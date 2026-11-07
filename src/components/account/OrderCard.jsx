@@ -37,7 +37,7 @@ export default function OrderCard({ order }) {
           alt={name}
           label="Product"
           sizes="128px"
-          imageClassName="object-contain p-2"
+          imageClassName="object-cover"
           className="h-full w-full bg-white"
         />
       </div>

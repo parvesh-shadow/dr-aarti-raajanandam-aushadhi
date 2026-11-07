@@ -1,44 +1,38 @@
 import Image from "next/image";
+import heroImg from "@/assets/pageimage.jpg";
 
 const HEADING = "Your Cart, Your Wellness Journey";
 const DESCRIPTION =
   "Review your selected products and make sure everything is ready for checkout.";
 
-export default function CartHero() {
+export default function CartHero({ heading = HEADING, description = DESCRIPTION }) {
   return (
     <section className="bg-white">
-      {/* Banner: fixed wide ratio (About/Blog/Contact hero jaisa), image crop hoke fit hogi */}
-      <div className="relative aspect-[16/7] w-full overflow-hidden md:aspect-[1920/340]">
+      {/* Banner: Account jaisi height. Mobile par natural height, md+ par 240px, lg+ par 300px */}
+      <div className="relative w-full overflow-hidden md:h-[240px] lg:h-[300px]">
         <Image
-          src="/carthero.jpg"
+          src={heroImg}
           alt="Cart banner"
-          fill
           priority
           quality={90}
           sizes="100vw"
-          className="object-cover object-center"
+          className="block h-auto w-full md:absolute md:inset-0 md:h-full md:object-cover md:object-[center_40%]"
         />
 
-        {/* Readability overlay + text: sirf md+ */}
-        <div className="absolute inset-0 hidden bg-white/10 md:block" />
-        <div className="absolute inset-0 hidden items-center justify-center px-6 text-center md:flex">
+        {/* Readability overlay: sabhi screens par */}
+        <div className="absolute inset-0 bg-white/10" />
+
+        {/* Text: sabhi screens par image ke andar, font size Account jaisa */}
+        <div className="absolute inset-0 flex items-center justify-center px-4 text-center sm:px-6">
           <div className="max-w-xl lg:max-w-3xl">
-            <h1 className="text-2xl font-medium text-black lg:text-2xl">
-              {HEADING}
+            <h1 className="text-3xl font-medium text-black md:text-[44px]">
+              {heading}
             </h1>
-            <p className="mt-2 text-sm text-gray-800 lg:text-base">
-              {DESCRIPTION}
+            <p className="mt-2 text-sm text-gray-800 sm:text-base">
+              {description}
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Text: sirf mobile pe image ke neeche */}
-      <div className="px-4 py-6 text-center sm:px-6 md:hidden">
-        <h1 className="text-2xl font-medium text-black sm:text-2xl">
-          {HEADING}
-        </h1>
-        <p className="mt-2 text-sm text-gray-800">{DESCRIPTION}</p>
       </div>
     </section>
   );

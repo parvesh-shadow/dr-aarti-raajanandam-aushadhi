@@ -82,25 +82,42 @@ function FieldError({ id, message }) {
 export default function AppointmentForm() {
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-    setSuccess(false);
+    setSuccess("");
+    setSubmitError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     const found = validate(values);
     setErrors(found);
+    if (Object.keys(found).length > 0) return;
 
-    if (Object.keys(found).length === 0) {
-      // TODO: backend/API yahan jodenge. Abhi sirf console me data.
-      console.log("Appointment request:", values);
-      setSuccess(true);
+    setSubmitting(true);
+    setSuccess("");
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/appointments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+      setSuccess(data.message || "Thank you. We have received your request.");
       setValues(INITIAL);
+    } catch (err) {
+      setSubmitError(err instanceof TypeError ? "Network error. Please check your connection." : err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -276,16 +293,18 @@ export default function AppointmentForm() {
 
           <button
             type="submit"
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs uppercase text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+            disabled={submitting}
+            className="disabled:opacity-60 mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs uppercase text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
           >
             Submit Appointment
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
 
           {success && (
-            <p role="status" className="mt-3 text-xs text-[#A88C35] sm:text-sm">
-              Thank you. Your request has been received. Our team will review and confirm it soon.
-            </p>
+            <p role="status" className="mt-3 text-xs text-[#A88C35] sm:text-sm">{success}</p>
+          )}
+          {submitError && (
+            <p role="alert" className="mt-3 text-xs text-red-600 sm:text-sm">{submitError}</p>
           )}
         </form>
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
+import { saveShipping } from "@/lib/checkoutStore";
 
 const STATES = [
   "Andhra Pradesh", "Bihar", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
@@ -38,6 +39,7 @@ function validate(values) {
     errors.mobile = "Enter a valid 10-digit mobile number.";
 
   if (!values.address.trim()) errors.address = "Please enter your delivery address.";
+  else if (values.address.trim().length < 5) errors.address = "Please enter your full address (at least 5 characters).";
   if (!values.city.trim()) errors.city = "Please enter your city.";
   if (!values.state) errors.state = "Please select your state.";
 
@@ -75,8 +77,16 @@ export default function AddressForm() {
     setErrors(found);
 
     if (Object.keys(found).length === 0) {
-      // No API yet. Data is only logged, then the user goes to the payment step.
-      console.log("Delivery details:", values);
+      saveShipping({
+        fullName: values.name.trim(),
+        phone: values.mobile.trim(),
+        email: values.email.trim(),
+        address: values.address.trim(),
+        city: values.city.trim(),
+        state: values.state,
+        pincode: values.pincode.trim(),
+        addressType: values.addressType,
+      });
       router.push("/checkout/payment");
     }
   };

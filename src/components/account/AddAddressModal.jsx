@@ -19,8 +19,10 @@ const fieldClass =
 const labelClass = "text-sm font-medium text-black sm:text-base";
 const errorClass = "mt-1 text-xs text-[#E3122E]";
 
-export default function AddAddressModal({ onClose, onSave }) {
-  const [form, setForm] = useState(initialForm);
+export default function AddAddressModal({ onClose, onSave, initial = null, saving = false, serverError = "" }) {
+  const [form, setForm] = useState(
+    initial ? { type: initial.label || "Home", address: initial.address, city: initial.city, state: initial.state, pin: initial.pincode } : initialForm
+  );
   const [errors, setErrors] = useState({});
 
   // Escape se band + background scroll lock
@@ -87,7 +89,7 @@ export default function AddAddressModal({ onClose, onSave }) {
           id="add-address-title"
           className="text-2xl font-semibold leading-8 text-gray-800 sm:text-[28px]"
         >
-          Add a new address
+          {initial ? "Edit address" : "Add a new address"}
         </h2>
 
         <form onSubmit={handleSubmit} noValidate className="mt-2">
@@ -188,11 +190,13 @@ export default function AddAddressModal({ onClose, onSave }) {
             {errors.pin && <p className={errorClass}>{errors.pin}</p>}
           </div>
 
+          {serverError && <p className={`${errorClass} mt-3`}>{serverError}</p>}
           <button
             type="submit"
+            disabled={saving}
             className="group mt-6 flex h-10 w-full items-center justify-center gap-2 bg-[#C5A84C] text-sm font-medium uppercase text-white transition-colors hover:bg-[#A88C35]"
           >
-            Save Address
+            {saving ? "Saving..." : "Save Address"}
             <ArrowRight
               className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
               aria-hidden="true"

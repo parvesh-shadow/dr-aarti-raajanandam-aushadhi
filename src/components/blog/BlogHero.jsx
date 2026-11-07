@@ -1,44 +1,38 @@
 import Image from "next/image";
-
+import heroImg from "@/assets/heroimage.webp";
 
 const HEADING = "Discover the Wisdom of Ayurveda";
 const DESCRIPTION =
   "Explore helpful articles on Ayurvedic traditions, herbal ingredients, everyday wellness, and mindful self-care with Dr. Arti’s Raaj Anandam Aushadhi.";
-const blogImage="/abouthero.jpg"
+
 export default function BlogHero() {
   return (
     <section className="bg-white">
-      <div className="relative">
-        {/* Image: poori dikhegi, crop nahi hogi */}
+      {/* Banner: Account jaisi height. Mobile par natural height, md+ par 240px, lg+ par 300px */}
+      <div className="relative w-full overflow-hidden md:h-[240px] lg:h-[300px]">
         <Image
-          src={blogImage}
+          src={heroImg}
           alt="Blog banner"
-          width={1920}
-          height={480}
           priority
+          quality={90}
           sizes="100vw"
-          className="h-auto w-full"
+          className="block h-auto w-full md:absolute md:inset-0 md:h-full md:object-cover md:object-[center_40%]"
         />
 
-        {/* Text overlay: sirf md+ */}
-        <div className="absolute inset-0 hidden items-center justify-center px-6 text-center md:flex">
+        {/* Readability overlay: sabhi screens par */}
+        <div className="absolute inset-0 bg-white/10" />
+
+        {/* Text: sabhi screens par image ke andar, font size Account jaisa */}
+        <div className="absolute inset-0 flex items-center justify-center px-4 text-center sm:px-6">
           <div className="max-w-xl lg:max-w-3xl">
-            <h1 className="text-2xl font-medium text-black lg:text-2xl">
+            <h1 className="text-3xl font-medium text-black md:text-[44px]">
               {HEADING}
             </h1>
-            <p className="mt-2 text-sm text-gray-800 lg:text-base">
+            <p className="mt-2 text-sm text-gray-800 sm:text-base">
               {DESCRIPTION}
             </p>
           </div>
         </div>
-      </div>
-
-      {/* Text: sirf mobile pe image ke neeche */}
-      <div className="px-4 py-6 text-center sm:px-6 md:hidden">
-        <h1 className="text-2xl font-medium text-black sm:text-2xl">
-          {HEADING}
-        </h1>
-        <p className="mt-2 text-sm text-gray-800">{DESCRIPTION}</p>
       </div>
     </section>
   );

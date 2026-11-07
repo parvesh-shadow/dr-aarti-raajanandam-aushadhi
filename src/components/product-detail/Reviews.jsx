@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Star } from "lucide-react";
 import TitleDescription from "@/components/shared/TitleDescription";
 
@@ -25,32 +26,91 @@ function Stars({ count, size = "h-4 w-4" }) {
 }
 
 export default function Reviews({
+  productId,
   heading,
   description,
-  overall = 4.0,
-  totalLabel = "Based on 100 reviews",
-  breakdown = [], // [{ label: "5.0 Excellent", count: 45 }]
+  initialSummary = { average: 0, count: 0, breakdown: [] },
   initialReviews = [],
+  initialPages = 1,
 }) {
+  const [summary, setSummary] = useState(initialSummary);
   const [reviews, setReviews] = useState(initialReviews);
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(initialPages);
+  const [loadingPage, setLoadingPage] = useState(false);
+
   const [rating, setRating] = useState(1);
   const [title, setTitle] = useState("");
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState(null); // { type: "success" | "error", text, login? }
 
+  const overall = summary.average || 0;
+  const breakdown = summary.breakdown || [];
+  const totalLabel = `Based on ${summary.count} review${summary.count === 1 ? "" : "s"}`;
   const total = breakdown.reduce((sum, row) => sum + row.count, 0) || 1;
 
-  const handleSubmit = (e) => {
+  // Logged-in user ho to naam pehle se bhar do
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => alive && d?.user?.name && setName((n) => n || d.user.name))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const goToPage = async (next) => {
+    if (next === page || loadingPage) return;
+    setLoadingPage(true);
+    try {
+      const res = await fetch(`/api/products/${productId}/reviews?page=${next}`, { cache: "no-store" });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.ok) throw new Error();
+      setReviews(d.reviews);
+      setPage(d.page);
+      setPages(d.pages);
+      document.getElementById("review-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch {
+      setMessage({ type: "error", text: "Could not load reviews. Please try again." });
+    } finally {
+      setLoadingPage(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Abhi sirf list me jodta hai. Backend baad me.
-    setReviews((prev) => [
-      { id: Date.now(), rating, title, name, text: comment, time: "Just now" },
-      ...prev,
-    ]);
-    setRating(1);
-    setTitle("");
-    setName("");
-    setComment("");
+    if (submitting) return;
+    setSubmitting(true);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/products/${productId}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, title, name, comment }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        setMessage({ type: "error", text: "Please log in to write a review.", login: true });
+        return;
+      }
+      if (!res.ok || !d.ok) throw new Error(d.error || "Could not submit your review.");
+      setSummary(d.summary); // rating turant update
+      setMessage({ type: "success", text: d.message });
+      setRating(1);
+      setTitle("");
+      setComment("");
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err instanceof TypeError ? "Network error. Please check your connection." : err.message,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const fieldClass =
@@ -187,14 +247,32 @@ export default function Reviews({
 
         <button
           type="submit"
-          className="mt-4 bg-[#C5A84C] px-6 py-2.5 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+          disabled={submitting}
+          className="mt-4 disabled:opacity-60 bg-[#C5A84C] px-6 py-2.5 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
         >
           Submit Review
         </button>
+
+        {message && (
+          <p
+            role={message.type === "error" ? "alert" : "status"}
+            className={`mt-3 text-xs sm:text-sm ${message.type === "error" ? "text-red-600" : "text-[#A88C35]"}`}
+          >
+            {message.text}
+            {message.login && (
+              <>
+                {" "}
+                <Link href="/auth/login" className="underline">
+                  Log in
+                </Link>
+              </>
+            )}
+          </p>
+        )}
       </form>
 
       {/* Review list */}
-      <ul className="mt-8 space-y-4">
+      <ul id="review-list" className="mt-8 space-y-4 scroll-mt-28">
         {reviews.map(({ id, rating: r, title: t, text, name: n, time }) => (
           <li key={id} className="border border-gray-300 bg-white p-4 sm:p-5">
             <Stars count={r} />
@@ -211,12 +289,38 @@ export default function Reviews({
                 {n}
               </p>
              
-              <p className="text-xs text-gray-600 sm:text-sm border-l-4 px-1  border-[#C5A84C] rounded-lg">{time}</p>
+              <p className="text-xs   border px-2 py-0  bg-[#C5A84C]  text-white cursor-pointer rounded-full">{time}</p>
             </div>
-            <p className="text-sm text-gray-800">Verified Customer</p>
+            <p className="text-sm text-gray-800">Verified Purchase</p>
           </li>
         ))}
       </ul>
+
+      {pages > 1 && (
+        <nav aria-label="Reviews pagination" className="mt-8 flex justify-center gap-2">
+          {Array.from({ length: pages }).map((_, i) => {
+            const number = i + 1;
+            const active = page === number;
+            return (
+              <button
+                key={number}
+                type="button"
+                onClick={() => goToPage(number)}
+                disabled={loadingPage}
+                aria-label={`Reviews page ${number}`}
+                aria-current={active ? "page" : undefined}
+                className={`h-8 w-8 border text-xs transition-colors sm:text-sm ${
+                  active
+                    ? "border-[#C5A84C] bg-[#C5A84C] text-white"
+                    : "border-black bg-white text-black hover:border-[#A88C35] hover:text-[#A88C35]"
+                }`}
+              >
+                {String(number).padStart(2, "0")}
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </section>
   );
 }

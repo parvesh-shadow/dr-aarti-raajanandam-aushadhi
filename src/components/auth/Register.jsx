@@ -3,17 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
 
 // Image mil jaye to yahan path daalo, e.g. "/signup-banner.jpg"
-const SIGNUP_IMAGE = "/authImage.jpg";
+const SIGNUP_IMAGE = "/authimage.jpg";
 
 const INPUT_CLASS =
   "mt-0.5 w-full border border-gray-200 bg-gray-100 px-4 py-3 text-xs text-black placeholder:text-gray-500 focus:border-[#C5A84C] focus:outline-none focus:ring-1 focus:ring-[#C5A84C] sm:text-sm";
 const LABEL_CLASS = "block text-sm font-medium text-black sm:text-base";
 
 export default function SignupForm({ className = "" }) {
+  const router = useRouter();
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -21,16 +23,43 @@ export default function SignupForm({ className = "" }) {
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: yahan signup API call lagao
-    console.log(form);
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.fullName,
+          email: form.email,
+          phone: form.mobile,
+          password: form.password,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok) {
+        router.push("/account");
+        router.refresh();
+      } else {
+        setError(data.error || "Signup failed. Please try again.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -94,9 +123,10 @@ export default function SignupForm({ className = "" }) {
               inputMode="numeric"
               autoComplete="tel"
               required
+              maxLength={10}
               value={form.mobile}
               onChange={handleChange}
-              placeholder="Enter your mobile number"
+              placeholder="Enter your 10-digit mobile number"
               className={INPUT_CLASS}
             />
           </div>
@@ -115,7 +145,7 @@ export default function SignupForm({ className = "" }) {
                 minLength={8}
                 value={form.password}
                 onChange={handleChange}
-                placeholder="Create a strong password"
+                placeholder="Min 8 chars, A-z, 0-9"
                 className={`${INPUT_CLASS} pr-11`}
               />
               <button
@@ -133,13 +163,20 @@ export default function SignupForm({ className = "" }) {
             </div>
           </div>
 
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
+
           <div className="pt-2">
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs font-medium uppercase tracking-wide text-white transition-colors hover:bg-[#A88C35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A88C35] sm:text-sm"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs font-medium uppercase tracking-wide text-white transition-colors hover:bg-[#A88C35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A88C35] disabled:opacity-60 sm:text-sm"
             >
-              Create account
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              {loading ? "Please wait..." : "Create account"}
+              {!loading && <ArrowRight className="h-4 w-4" aria-hidden="true" />}
             </button>
 
             <p className="mt-4 text-center text-xs text-gray-800 sm:text-sm">
@@ -157,7 +194,7 @@ export default function SignupForm({ className = "" }) {
 
       {/* Right: image
           small screen: hidden
-          lg+: dikhegi, height kam (5/4 ratio), image cover hoke fit */}
+          lg+: square image, max 440px */}
       <div className="relative hidden w-full overflow-hidden lg:block lg:aspect-square lg:max-w-[440px] lg:justify-self-center">
         {SIGNUP_IMAGE ? (
           <Image

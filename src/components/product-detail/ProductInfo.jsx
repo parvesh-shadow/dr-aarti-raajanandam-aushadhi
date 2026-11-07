@@ -3,9 +3,11 @@ import { Share2 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { Download, Lock, Minus, Plus, ShoppingBag, Star } from "lucide-react";
+import { addToCart } from "@/lib/checkoutStore";
 
 export default function ProductInfo({ product, className = "" }) {
   const {
+    id,
     category,
     name,
     rating,
@@ -22,12 +24,15 @@ export default function ProductInfo({ product, className = "" }) {
   const [added, setAdded] = useState(false);
 
   const changeQty = (value) => {
-    setQty(Math.min(Math.max(value, 1), stock));
+    setQty(Math.min(Math.max(value, 1), Math.max(stock, 1)));
     setAdded(false);
   };
 
-  // Abhi sirf message. Asli cart logic baad me jodenge.
-  const handleAddToCart = () => setAdded(true);
+  const handleAddToCart = () => {
+    if (stock < 1) return;
+    addToCart(id, qty);
+    setAdded(true);
+  };
 
   return (
     <div className={className}>
@@ -125,6 +130,7 @@ export default function ProductInfo({ product, className = "" }) {
         </button>
         <Link
           href="/checkout"
+          onClick={() => stock > 0 && addToCart(id, qty)}
           className="border border-[#C5A84C] px-4 py-3 text-center text-xs text-[#A88C35] transition-colors hover:bg-[#A88C35] hover:text-white active:bg-[#A88C35] active:text-white sm:text-sm"
         >
           Buy Now

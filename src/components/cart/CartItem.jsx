@@ -9,7 +9,7 @@ export default function CartItem({ item, onQtyChange, onRemove }) {
       {/* Image */}
       <div className="relative h-36 w-full shrink-0 sm:h-36 sm:w-34">
         {category && (
-          <span className="absolute left-0 top-0 z-10 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-black">
+          <span className="absolute left-0 top-0 z-10 rounded-xs bg-gray-100 px-2 py-0.5 text-xs text-black">
             {category}
           </span>
         )}
@@ -18,11 +18,11 @@ export default function CartItem({ item, onQtyChange, onRemove }) {
           alt={name}
           label="Product"
           sizes="128px"
-          imageClassName="object-contain p-2"
+          imageClassName="object-cover"
           className="h-full w-full bg-white"
         />
         {inStock && (
-          <span className="absolute bottom-0 right-0 z-10 text-xs sm:textsm font-medium text-black">
+          <span className="absolute bottom-0 bg-white rounded-xs px-1 py-0.5 right-0 z-10 text-xs sm:textsm font-medium text-black">
             In Stock
           </span>
         )}
