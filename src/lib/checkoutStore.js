@@ -1,86 +1,53 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  MAX_QTY,
+  clearShippingDetails,
+  getShippingDetails,
+  getStoredCart,
+  setShippingDetails,
+  setStoredCart,
+  subscribeShop,
+  useShopReady,
+} from "@/lib/shopSession";
 
-// Client-side cart + checkout details (localStorage). Prices are always re-read from the DB.
-const CART_KEY = "raa_cart";
-const SHIP_KEY = "raa_shipping";
-const MAX_QTY = 10;
+// Client-side cart + checkout details. Guest = localStorage, logged-in user = database
+// (lib/shopSession.js dekho). Prices are always re-read from the DB.
 
-const read = (key, fallback) => {
-  try {
-    const v = JSON.parse(window.localStorage.getItem(key));
-    return v ?? fallback;
-  } catch {
-    return fallback;
-  }
-};
-const write = (key, value) => {
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {}
-};
-
-export function getCart() {
-  const c = read(CART_KEY, []);
-  return Array.isArray(c)
-    ? c.filter((i) => i && typeof i.productId === "string" && Number.isInteger(i.quantity) && i.quantity > 0)
-    : [];
-}
-
-// Cart change hote hi ye event jaata hai, taaki Navbar ka count turant update ho.
-export const CART_EVENT = "raa-cart-updated";
-const notifyCart = () => {
-  try {
-    window.dispatchEvent(new Event(CART_EVENT));
-  } catch {}
-};
-
-export const saveCart = (items) => {
-  write(CART_KEY, items);
-  notifyCart();
-};
+export const getCart = getStoredCart;
+export const saveCart = (items) => setStoredCart(items);
 
 export function addToCart(productId, quantity = 1) {
   if (!productId) return;
-  const cart = getCart();
+  const cart = getCart().map((i) => ({ ...i }));
   const found = cart.find((i) => i.productId === productId);
   if (found) found.quantity = Math.min(MAX_QTY, found.quantity + quantity);
   else cart.push({ productId, quantity: Math.min(MAX_QTY, Math.max(1, quantity)) });
   saveCart(cart);
 }
 
-export const getShipping = () => read(SHIP_KEY, null);
-export const saveShipping = (shipping) => write(SHIP_KEY, shipping);
+export const getShipping = getShippingDetails;
+export const saveShipping = setShippingDetails;
 
 export function clearCheckout() {
-  try {
-    window.localStorage.removeItem(CART_KEY);
-    window.localStorage.removeItem(SHIP_KEY);
-  } catch {}
-  notifyCart();
+  clearShippingDetails();
+  saveCart([]);
 }
 
 // Cart me alag-alag products ki ginti (quantity nahi). Navbar badge ke liye.
 export const getCartCount = () => new Set(getCart().map((i) => i.productId)).size;
 
-const subscribeCart = (cb) => {
-  window.addEventListener(CART_EVENT, cb);
-  window.addEventListener("storage", cb); // dusre tab me change ho to bhi update
-  return () => {
-    window.removeEventListener(CART_EVENT, cb);
-    window.removeEventListener("storage", cb);
-  };
-};
-
 export function useCartCount() {
-  return useSyncExternalStore(subscribeCart, getCartCount, () => 0);
+  return useSyncExternalStore(subscribeShop, getCartCount, () => 0);
 }
 
 // Cart items hydrated from the public product API (shape = CartItem props).
 export function useCartItems() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const ready = useShopReady(); // login status check hone ke baad hi cart padho
 
   useEffect(() => {
+    if (!ready) return;
     let alive = true;
     (async () => {
       const rows = await Promise.all(
@@ -100,6 +67,7 @@ export function useCartItems() {
               qty: Math.min(c.quantity, MAX_QTY),
               image: p.image,
               inStock: p.stock > 0,
+              stock: p.stock || 0,
             };
           } catch {
             return null;
@@ -113,7 +81,7 @@ export function useCartItems() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [ready]);
 
   const commit = (next) => {
     setItems(next);

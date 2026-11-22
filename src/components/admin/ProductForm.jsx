@@ -134,8 +134,10 @@ export default function ProductForm({ productId }) {
     if (!files?.length) return;
     run(async () => {
       const urls = [];
-      for (const file of [...files]) urls.push(await uploadImage(file));
-      setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, 8) }));
+      // Max 5 images: sirf bachi hui jagah jitni files upload karo
+      const room = Math.max(0, 5 - form.images.length);
+      for (const file of [...files].slice(0, room)) urls.push(await uploadImage(file));
+      setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, 5) }));
     }).finally(() => (e.target.value = ""));
   };
 
@@ -171,7 +173,7 @@ export default function ProductForm({ productId }) {
       price: Number(form.price),
       mrp: Number(form.mrp) || 0,
       stock: Number(form.stock) || 0,
-      images: form.images,
+      images: form.images.slice(0, 5), // purane products ki 5 se zyada images bhi save ho sake
       brochureHref: form.brochureHref,
       about: form.about,
       specs: form.specs.filter((r) => r.label?.trim() && r.value?.trim()),
@@ -249,7 +251,7 @@ export default function ProductForm({ productId }) {
       {/* 2. Images + brochure */}
       <Section title="Images & Brochure">
         <div>
-          <label className={LABEL}>Images (max 8, JPG/PNG/WEBP. Pehli image main hai)</label>
+          <label className={LABEL}>Images (max 5, JPG/PNG/WEBP. Pehli image main hai)</label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"

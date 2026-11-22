@@ -67,7 +67,7 @@ export default function Product({
             </span>
           )}
 
-          <div className="w-full h-full overflow-hidden border border-gray-200 shadow-sm rounded-sm">
+          <div className="w-full h-full overflow-hidden border-none border-gray-200  rounded-sm">
             <ImagePlaceholder
               src={image}
               alt={name}
@@ -78,9 +78,13 @@ export default function Product({
             />
           </div>
 
-          {inStock && (
+          {inStock ? (
             <span className="absolute bottom-2 right-2 z-20 text-xs font-medium bg-white/90 px-2 py-0.5 rounded text-black sm:text-sm shadow-sm">
               In Stock
+            </span>
+          ) : (
+            <span className="absolute bottom-2 right-2 z-20 text-xs font-semibold bg-white/90 px-2 py-0.5 rounded text-red-600 sm:text-sm shadow-sm">
+              Out of Stock
             </span>
           )}
         </Link>
@@ -90,12 +94,18 @@ export default function Product({
           type="button"
           onClick={handleWishlist}
           aria-pressed={wishlisted}
-          aria-label={wishlisted ? `Remove ${name} from wishlist` : `Add ${name} to wishlist`}
+          aria-label={
+            wishlisted
+              ? `Remove ${name} from wishlist`
+              : `Add ${name} to wishlist`
+          }
           className="absolute right-2 top-2 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm transition-colors hover:bg-white active:scale-95"
         >
           <Heart
             className={`h-4 w-4 transition-colors ${
-              wishlisted ? "fill-red-500 text-red-500" : "text-gray-700 hover:text-[#A88C35]"
+              wishlisted
+                ? "fill-red-500 text-red-500"
+                : "text-gray-700 hover:text-[#A88C35]"
             }`}
             strokeWidth={1.8}
             aria-hidden="true"
@@ -113,41 +123,50 @@ export default function Product({
         </p>
         {pack && <p className="mt-2 text-sm text-gray-800">{pack}</p>}
 
-       <div className="mt-3 flex items-center justify-between">
-  <span className="text-lg font-bold text-gray-800">₹{price}</span>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-lg font-bold text-gray-800">₹{price}</span>
 
-  {rating != null && rating !== "" && (
-    <span className="flex items-center gap-1 text-xs text-black sm:text-sm">
-      <span className="flex gap-0.5" aria-hidden="true">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const isFilled = i < Number(rating);
+          {rating != null && rating !== "" && (
+            <span className="flex items-center gap-1 text-xs text-black sm:text-sm">
+              <span className="flex gap-0.5" aria-hidden="true">
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const isFilled = i < Number(rating);
 
-          return (
-            <Star
-              key={i}
-              size={14}
-              fill={isFilled ? "#C5A84C" : "none"}
-              color={isFilled ? "#C5A84C" : "#D1D5DB"}
-              strokeWidth={isFilled ? 0 : 1.5}
-            />
-          );
-        })}
-      </span>
+                  return (
+                    <Star
+                      key={i}
+                      size={14}
+                      fill={isFilled ? "#C5A84C" : "none"}
+                      color={isFilled ? "#C5A84C" : "#D1D5DB"}
+                      strokeWidth={isFilled ? 0 : 1.5}
+                    />
+                  );
+                })}
+              </span>
 
-      {/* <span className="sr-only">Rated</span>
+              {/* <span className="sr-only">Rated</span>
       <span className="ml-1 font-medium">{rating}</span> */}
-    </span>
-  )}
-</div>
+            </span>
+          )}
+        </div>
 
         {/* Buttons stay at the bottom */}
         <div className="mt-auto flex gap-2 pt-4">
-          <Link
-            href={href}
-            className="flex-1 bg-[#C5A84C] px-4 py-2.5 text-center text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
-          >
-            {buyNowLabel}
-          </Link>
+          {inStock ? (
+            <Link
+              href={href}
+              className="flex-1 bg-[#C5A84C] px-4 py-2.5 text-center text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+            >
+              {buyNowLabel}
+            </Link>
+          ) : (
+            <span
+              aria-disabled="true"
+              className="flex-1 cursor-not-allowed bg-gray-300 px-4 py-2.5 text-center text-xs text-gray-600 sm:text-sm"
+            >
+              Out of Stock
+            </span>
+          )}
           <button
             type="button"
             onClick={handleAddToCart}
@@ -158,7 +177,11 @@ export default function Product({
             {added ? (
               <Check className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
             ) : (
-              <ShoppingBag className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+              <ShoppingBag
+                className="h-4 w-4"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
             )}
           </button>
         </div>
@@ -166,7 +189,6 @@ export default function Product({
     </article>
   );
 }
-
 
 // "use client";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { saveShipping } from "@/lib/checkoutStore";
@@ -60,10 +60,58 @@ function FieldError({ id, message }) {
   );
 }
 
+const NEW_ADDRESS = "new";
+
 export default function AddressForm() {
   const router = useRouter();
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
+  // Logged-in user ke saved addresses (guest ke liye khali, select nahi dikhega)
+  const [saved, setSaved] = useState([]);
+  const [selectedId, setSelectedId] = useState(NEW_ADDRESS);
+
+  const fillFrom = (a) =>
+    setValues((prev) => ({
+      ...prev,
+      name: a.fullName || prev.name,
+      mobile: a.phone || prev.mobile,
+      addressType: a.label === "Work" ? "Work" : "Home",
+      address: a.address,
+      city: a.city,
+      state: a.state,
+      pincode: a.pincode,
+    }));
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/account/addresses", { cache: "no-store" });
+        if (!res.ok) return; // login nahi hai
+        const data = await res.json();
+        const list = Array.isArray(data.addresses) ? data.addresses : [];
+        if (!alive || list.length === 0) return;
+        setSaved(list);
+        setSelectedId(list[0].id);
+        fillFrom(list[0]);
+      } catch {}
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const handleSelectAddress = (e) => {
+    const id = e.target.value;
+    setSelectedId(id);
+    setErrors({});
+    if (id === NEW_ADDRESS) {
+      setValues((prev) => ({ ...prev, addressType: "Home", address: "", city: "", state: "", pincode: "" }));
+      return;
+    }
+    const a = saved.find((x) => x.id === id);
+    if (a) fillFrom(a);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -166,6 +214,27 @@ export default function AddressForm() {
         {/* Shipping address */}
         <h3 className="mt-6 text-base font-medium text-black">Shipping Address</h3>
 
+        {saved.length > 0 && (
+          <div className="mt-3">
+            <label htmlFor="saved-address" className={labelClass}>
+              Choose a saved address
+            </label>
+            <select
+              id="saved-address"
+              value={selectedId}
+              onChange={handleSelectAddress}
+              className={fieldClass("savedAddress")}
+            >
+              {saved.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.label} - {a.text}
+                </option>
+              ))}
+              <option value={NEW_ADDRESS}>+ Add a new address</option>
+            </select>
+          </div>
+        )}
+
         <div className="mt-3 flex gap-2" role="group" aria-label="Address type">
           {["Home", "Work"].map((type) => {
             const active = values.addressType === type;
@@ -233,7 +302,7 @@ export default function AddressForm() {
               className={fieldClass("state")}
             >
               <option value="">Select state</option>
-              {STATES.map((state) => (
+              {(!values.state || STATES.includes(values.state) ? STATES : [...STATES, values.state]).map((state) => (
                 <option key={state} value={state}>{state}</option>
               ))}
             </select>

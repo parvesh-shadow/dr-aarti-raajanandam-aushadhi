@@ -10,6 +10,18 @@ const userSchema = new mongoose.Schema(
     dob: { type: Date, default: null },
     lastLoginAt: { type: Date, default: null },
     addressesBackfilled: { type: Boolean, default: false },
+    // Logged-in user ka cart / wishlist (guest ka localStorage login par yahan merge hota hai)
+    cart: {
+      type: [
+        {
+          _id: false,
+          productId: { type: String, required: true },
+          quantity: { type: Number, required: true, min: 1, max: 10 },
+        },
+      ],
+      default: [],
+    },
+    wishlist: { type: [String], default: [] },
     addresses: {
       type: [
         {

@@ -53,7 +53,7 @@ export function parseProduct(body) {
     netQuantity: str(b.netQuantity, 100),
     packSize: str(b.packSize, 100),
     type: str(b.type, 100) || "Ayurvedic product",
-    images: (Array.isArray(b.images) ? b.images : []).map(safeUrl).filter(Boolean).slice(0, 10),
+    images: (Array.isArray(b.images) ? b.images : []).map(safeUrl).filter(Boolean).slice(0, 5),
     brochureUrl: safeUrl(b.brochureUrl),
     benefitsIntro: str(b.benefitsIntro, 2000),
     benefits: pairs(b.benefits, "title", "description"),

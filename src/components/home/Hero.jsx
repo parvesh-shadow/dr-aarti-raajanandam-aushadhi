@@ -21,7 +21,9 @@ const SLIDES = [
   },
 ];
 
-const AUTOPLAY_MS = 4000;
+const AUTOPLAY_MS = 2000;
+const TRANSITION_MS = 500; // neeche duration-500 se match hona chahiye
+const SWIPE_MIN_PX = 50;
 const COUNT = SLIDES.length;
 
 // Clone last at start and first at end for a seamless infinite loop
@@ -37,7 +39,8 @@ function HeroSlide({ image, alt, priority = false, isClone = false }) {
           alt={isClone ? "" : alt}
           priority={priority}
           sizes="100vw"
-          className="h-auto w-full lg:absolute lg:inset-0 lg:h-full lg:w-full lg:object-cover lg:object-center"
+          draggable={false}
+          className="pointer-events-none h-auto w-full select-none lg:absolute lg:inset-0 lg:h-full lg:w-full lg:object-cover lg:object-center"
         />
       </div>
     </div>
@@ -47,36 +50,57 @@ function HeroSlide({ image, alt, priority = false, isClone = false }) {
 export default function Hero() {
   const [index, setIndex] = useState(1);
   const [animate, setAnimate] = useState(true);
-  const [paused, setPaused] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  const sectionRef = useRef(null);
   const moving = useRef(false);
+  const unlockTimer = useRef(null);
+  const draggingRef = useRef(false);
 
   // Real slide index (0..COUNT-1) for the active dot
   const activeDot = (index - 1 + COUNT) % COUNT;
 
+  // moving lock: transitionend na aaye tab bhi lock khul jaye
+  const lock = useCallback(() => {
+    moving.current = true;
+    clearTimeout(unlockTimer.current);
+    unlockTimer.current = setTimeout(() => {
+      moving.current = false;
+    }, TRANSITION_MS + 300);
+  }, []);
+
   const next = useCallback(() => {
     if (moving.current) return;
-    moving.current = true;
+    lock();
     setAnimate(true);
     setIndex((i) => i + 1);
-  }, []);
+  }, [lock]);
+
+  const prev = useCallback(() => {
+    if (moving.current) return;
+    lock();
+    setAnimate(true);
+    setIndex((i) => i - 1);
+  }, [lock]);
 
   const goTo = useCallback(
     (slideIndex) => {
       const target = slideIndex + 1;
       if (moving.current || target === index) return;
-      moving.current = true;
+      lock();
       setAnimate(true);
       setIndex(target);
     },
-    [index]
+    [index, lock]
   );
 
-  // Autoplay (always forward)
+  // Autoplay: hover par band nahi hota. Sirf drag ke dauran ruka rehta hai.
   useEffect(() => {
-    if (paused) return;
+    if (dragging) return;
     const id = setInterval(next, AUTOPLAY_MS);
     return () => clearInterval(id);
-  }, [paused, index, next]);
+  }, [dragging, index, next]);
 
   // Re-enable animation after a silent jump
   useEffect(() => {
@@ -87,7 +111,10 @@ export default function Hero() {
     return () => cancelAnimationFrame(id);
   }, [animate]);
 
-  const handleTransitionEnd = () => {
+  useEffect(() => () => clearTimeout(unlockTimer.current), []);
+
+  const handleTransitionEnd = (e) => {
+    if (e.target !== e.currentTarget) return;
     moving.current = false;
     if (index === COUNT + 1) {
       setAnimate(false);
@@ -98,22 +125,109 @@ export default function Hero() {
     }
   };
 
+  /* ---------------- drag / swipe: mouse + touch + pen ----------------
+     Listeners window par lagte hain, isliye mouse slider se bahar
+     chala jaye tab bhi drag sahi chalta hai. */
+  const onPointerDown = (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return; // sirf left click
+    if (moving.current) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    let axis = null; // "x" | "y"
+    let dx = 0;
+
+    draggingRef.current = true;
+    setDragging(true);
+
+    const move = (ev) => {
+      if (!draggingRef.current) return;
+      dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      if (axis === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      if (axis === "x") setDragX(dx);
+    };
+
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+
+      draggingRef.current = false;
+      setDragging(false);
+      setDragX(0);
+
+      if (axis === "x" && Math.abs(dx) > SWIPE_MIN_PX) {
+        if (dx < 0) next();
+        else prev();
+      }
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  };
+
+  /* ---------------- trackpad: do ungli se left/right swipe ----------------
+     Laptop trackpad ka horizontal swipe pointer event nahi, wheel event hota hai. */
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    let acc = 0;
+    let lastChange = 0;
+    let resetTimer;
+
+    const onWheel = (e) => {
+      // sirf horizontal gesture; vertical page scroll ko mat roko
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      e.preventDefault(); // browser back/forward gesture na ho
+
+      const now = Date.now();
+      if (now - lastChange < 700) return; // ek swipe = ek slide
+
+      acc += e.deltaX;
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        acc = 0;
+      }, 150);
+
+      if (Math.abs(acc) > 50) {
+        if (acc > 0) next();
+        else prev();
+        acc = 0;
+        lastChange = now;
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      clearTimeout(resetTimer);
+    };
+  }, [next, prev]);
+
   return (
-    <div
-      className="w-full"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
+    <div className="w-full">
       <section
+        ref={sectionRef}
         aria-label="Hero slider"
         aria-roledescription="carousel"
-        className="relative w-full overflow-hidden lg:max-h-[600px]"
+        className={`relative w-full touch-pan-y select-none overflow-hidden lg:max-h-[600px] ${
+          dragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
+        onPointerDown={onPointerDown}
+        onDragStart={(e) => e.preventDefault()}
       >
         <div
           className={`flex ${
-            animate ? "transition-transform duration-700 ease-in-out" : ""
+            animate && !dragging
+              ? "transition-transform duration-500 ease-in-out"
+              : ""
           }`}
-          style={{ transform: `translateX(-${index * 100}%)` }}
+          style={{ transform: `translateX(calc(-${index * 100}% + ${dragX}px))` }}
           onTransitionEnd={handleTransitionEnd}
         >
           {TRACK.map((slide, i) => {

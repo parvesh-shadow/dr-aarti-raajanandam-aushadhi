@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, Trash2 } from "lucide-react";
+import Pagination from "@/components/shared/Pagination";
 
 const fmt = (d) =>
   new Date(d).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -261,14 +262,8 @@ export default function SubmissionsTable({ kind }) {
           </tbody>
         </table>
       </div>
+      <Pagination className="mt-4" page={page} pages={data.pages} total={data.total} limit={20} onChange={setPage} disabled={loading} />
 
-      {data.pages > 1 && (
-        <div className="mt-4 flex items-center gap-3 text-sm">
-          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="border border-black px-3 py-1 disabled:opacity-40">Prev</button>
-          <span>Page {page} of {data.pages}</span>
-          <button disabled={page >= data.pages} onClick={() => setPage((p) => p + 1)} className="border border-black px-3 py-1 disabled:opacity-40">Next</button>
-        </div>
-      )}
 
       {view && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={() => !busy && setView(null)}>

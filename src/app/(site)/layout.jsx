@@ -1,3 +1,4 @@
+import WhatsAppButton from "@/components/home/WhatshapIntegrate";
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 import ScrollToTop from "@/components/shared/ScrollToTop";
@@ -15,6 +16,7 @@ export default async function SiteLayout({ children }) {
       <Navbar />
       {children}
       <Footer phone={settings.phone} email={settings.email} socials={settings.socials} />
+       <WhatsAppButton />
     </>
   );
 }

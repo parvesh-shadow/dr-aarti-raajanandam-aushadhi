@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 // Usage: ADMIN_EMAIL=... ADMIN_PASSWORD=... node --env-file=.env.local scripts/create-admin.mjs
-const ADMIN_NAME = process.env.ADMIN_NAME || "Admin";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const ADMIN_NAME ="Admin";
+const ADMIN_EMAIL = "raajanandam22@gmail.com";
+const ADMIN_PASSWORD = "anandam22@raaj2";
 
 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ADMIN_EMAIL) || ADMIN_PASSWORD.length < 12) {
   console.error("Set a valid ADMIN_EMAIL and ADMIN_PASSWORD (min 12 chars) as environment variables.");

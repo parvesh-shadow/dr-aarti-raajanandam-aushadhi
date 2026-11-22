@@ -23,8 +23,10 @@ export default function OrderReview({ paymentLabel = "Cash on Delivery", payment
   const discount = 0;
   const total = subtotal + shipping - discount;
 
+  const unavailable = items.some((i) => !i.inStock || i.qty > i.stock);
+
   const handleConfirm = async () => {
-    if (submitting) return;
+    if (submitting || unavailable) return;
     const ship = getShipping();
     if (!ship) {
       router.push("/checkout");
@@ -100,6 +102,12 @@ export default function OrderReview({ paymentLabel = "Cash on Delivery", payment
           <span>{format(total)}</span>
         </div>
 
+        {unavailable && (
+          <p role="alert" className="mt-3 text-xs text-red-600">
+            Some items are out of stock or not available in this quantity. Please update your cart.
+          </p>
+        )}
+
         {error && (
           <p role="alert" className="mt-3 text-xs text-red-600">
             {error}
@@ -109,7 +117,7 @@ export default function OrderReview({ paymentLabel = "Cash on Delivery", payment
         <button
           type="button"
           onClick={handleConfirm}
-          disabled={submitting}
+          disabled={submitting || unavailable}
           className="mt-4 disabled:opacity-60 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
         >
           {submitting ? "Placing order..." : "Confirm"}

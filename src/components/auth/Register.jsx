@@ -1,5 +1,6 @@
 "use client";
 
+import { syncShopSession } from "@/lib/shopSession";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -50,6 +51,7 @@ export default function SignupForm({ className = "" }) {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
+        await syncShopSession(); // guest cart/wishlist naye account me chali jaye
         router.push("/account");
         router.refresh();
       } else {

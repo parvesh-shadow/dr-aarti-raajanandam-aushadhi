@@ -13,9 +13,12 @@ const appointmentSchema = new mongoose.Schema(
     reason: { type: String, required: true, trim: true, maxlength: 100 },
     message: { type: String, default: "", trim: true, maxlength: 2000 },
     status: { type: String, enum: APPOINTMENT_STATUSES, default: "new", index: true },
+    // logged-in user ne book kiya ho to uska id (My Appointments isi se dikhta hai)
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null, index: true },
   },
   { timestamps: true }
 );
 appointmentSchema.index({ createdAt: -1 });
+appointmentSchema.index({ user: 1, createdAt: -1 });
 
 export default mongoose.models.Appointment || mongoose.model("Appointment", appointmentSchema);

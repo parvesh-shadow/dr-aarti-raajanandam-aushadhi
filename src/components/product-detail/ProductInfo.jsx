@@ -73,7 +73,14 @@ export default function ProductInfo({ product, className = "" }) {
       <p className="text-xs lg:text-sm text-gray-600 -mt-2">Inclusive of all taxes</p>
 
       <p className="mt-1.5 text-sm text-black sm:text-base font-medium text-gray-600">
-        Availability: <span className="font-bold text-lg text-gray-900">In stock</span> {stock} available
+        Availability:{" "}
+        {stock > 0 ? (
+          <>
+            <span className="font-bold text-lg text-gray-900">In stock</span> {stock} available
+          </>
+        ) : (
+          <span className="font-bold text-lg text-red-600">Out of stock</span>
+        )}
       </p>
 
       <p className="mt-3 text-xs text-gray-800 sm:text-sm">{description}</p>
@@ -123,18 +130,28 @@ export default function ProductInfo({ product, className = "" }) {
         <button
           type="button"
           onClick={handleAddToCart}
-          className="inline-flex items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+          disabled={stock < 1}
+          className="inline-flex items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 sm:text-sm"
         >
-          Add to cart
+          {stock < 1 ? "Out of stock" : "Add to cart"}
           <ShoppingBag className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
         </button>
-        <Link
-          href="/checkout"
-          onClick={() => stock > 0 && addToCart(id, qty)}
-          className="border border-[#C5A84C] px-4 py-3 text-center text-xs text-[#A88C35] transition-colors hover:bg-[#A88C35] hover:text-white active:bg-[#A88C35] active:text-white sm:text-sm"
-        >
-          Buy Now
-        </Link>
+        {stock > 0 ? (
+          <Link
+            href="/checkout"
+            onClick={() => addToCart(id, qty)}
+            className="border border-[#C5A84C] px-4 py-3 text-center text-xs text-[#A88C35] transition-colors hover:bg-[#A88C35] hover:text-white active:bg-[#A88C35] active:text-white sm:text-sm"
+          >
+            Buy Now
+          </Link>
+        ) : (
+          <span
+            aria-disabled="true"
+            className="cursor-not-allowed border border-gray-300 px-4 py-3 text-center text-xs text-gray-500 sm:text-sm"
+          >
+            Buy Now
+          </span>
+        )}
       </div>
 
       {added && (

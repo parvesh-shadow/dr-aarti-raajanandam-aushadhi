@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
+import { syncShopSession } from "@/lib/shopSession";
 
 // Image mil jaye to yahan path daalo, e.g. "/login-banner.jpg"
 const LOGIN_IMAGE = "/authimage.jpg";
@@ -36,7 +37,12 @@ export default function LoginForm({ className = "" }) {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        router.push("/account");
+        // Guest cart/wishlist ko account me merge karo, phir aage badho
+        await syncShopSession();
+        // /cart ya /wishlist se aaye the to wahin wapas bhejo (sirf apni site ke path)
+        const next = new URLSearchParams(window.location.search).get("next");
+        const safeNext = next && /^\/(?!\/|\\)/.test(next) ? next : "/account";
+        router.push(safeNext);
         router.refresh();
       } else {
         setError(data.error || "Login failed. Please try again.");

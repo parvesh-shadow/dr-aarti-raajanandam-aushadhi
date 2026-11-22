@@ -7,11 +7,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowRight, Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { useCartCount } from "@/lib/checkoutStore";
 import { useWishlistCount } from "@/lib/wishlistStore";
+import { syncShopSession } from "@/lib/shopSession";
 import logo from "@/assets/logo.svg";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About Us", href: "/about" },
+   { label: "Founder", href: "/founder" },
   { label: "Ayurvedic Medicines", href: "/products" },
   { label: "Blogs", href: "/blogs" },
   { label: "Contact Us", href: "/contact" },
@@ -194,11 +196,21 @@ function SearchPanel({ query, setQuery, onClose, mobile = false, panelRef }) {
 }
 
 // Navbar ke bahar declare kiya hai (render ke andar nahi)
-function UserIcons({ onNavigate, mobile = false, searchOpen = false, onToggleSearch }) {
+function UserIcons({ onNavigate, mobile = false, searchOpen = false, onToggleSearch, user = null }) {
   const pathname = usePathname();
   const onAccountPage = pathname.startsWith("/account");
   const cartCount = useCartCount();
   const wishlistCount = useWishlistCount();
+
+  // Login hai to naam ka pehla akshar, nahi to account icon
+  const initial = user?.name?.trim()?.[0]?.toUpperCase() || "";
+  const avatar = initial ? (
+    <span className="grid h-9 w-9 place-items-center rounded-full bg-[#C5A84C] text-sm font-semibold text-white" aria-hidden="true">
+      {initial}
+    </span>
+  ) : (
+    <User className="h-5 w-5" aria-hidden="true" />
+  );
 
   const openSidebar = () => {
     onNavigate?.();
@@ -215,17 +227,17 @@ function UserIcons({ onNavigate, mobile = false, searchOpen = false, onToggleSea
           onClick={openSidebar}
           className="p-2 text-[#C5A84C] transition-colors hover:text-[#A88C35]"
         >
-          <User className="h-5 w-5" aria-hidden="true" />
+          {avatar}
         </button>
       ) : (
         // Laptop, ya kisi aur page par: seedha /account par jao
         <Link
           href="/account"
           onClick={onNavigate}
-          aria-label="My account"
+          aria-label={initial ? `My account (${user.name})` : "My account"}
           className="p-2 text-[#C5A84C] transition-colors hover:text-[#A88C35]"
         >
-          <User className="h-5 w-5" aria-hidden="true" />
+          {avatar}
         </Link>
       )}
 
@@ -296,23 +308,23 @@ export default function Navbar() {
   useEffect(() => {
     let cancelled = false;
 
-    async function checkAuth() {
-      try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
-        const data = res.ok ? await res.json() : null;
-        if (!cancelled) setUser(data?.user ?? null);
-      } catch {
-        if (!cancelled) setUser(null);
-      } finally {
-        if (!cancelled) setAuthReady(true);
-      }
-    }
-
-    checkAuth();
+    // Login status check + cart/wishlist sync (guest -> DB merge) ek saath
+    syncShopSession().then((u) => {
+      if (cancelled) return;
+      setUser(u ?? null);
+      setAuthReady(true);
+    });
     return () => {
       cancelled = true;
     };
   }, [pathname]);
+
+  // Profile me naam badalne par navbar ka akshar bhi badle
+  useEffect(() => {
+    const onUpdate = (e) => setUser((u) => (u ? { ...u, ...e.detail } : u));
+    window.addEventListener("profile-updated", onUpdate);
+    return () => window.removeEventListener("profile-updated", onUpdate);
+  }, []);
 
   const isLoggedIn = !!user;
 
@@ -373,34 +385,14 @@ export default function Navbar() {
             </Link>
           )}
 
-          {!authReady ? (
-            // Check hone tak jagah rok kar rakho, taaki button jump na kare
-            <div className="h-10 w-24" aria-hidden="true" />
-          ) : isLoggedIn ? (
-            <UserIcons searchOpen={searchOpen} onToggleSearch={toggleSearch} />
-          ) : (
-            <>
-              {!searchOpen && (
-                <Link
-                  href="/auth/login"
-                  className="border border-black px-5 py-2.5 text-sm text-black transition-colors hover:border-[#A88C35] hover:bg-[#A88C35] hover:text-white active:border-[#A88C35] active:text-[#A88C35]"
-                >
-                  Log in
-                </Link>
-              )}
-              <SearchToggle open={searchOpen} onToggle={toggleSearch} />
-            </>
-          )}
+          {/* Icons hamesha dikhte hain. Guest ke liye count localStorage se aata hai,
+              aur account / cart / wishlist par click karne se login page khulta hai. */}
+          <UserIcons user={user} searchOpen={searchOpen} onToggleSearch={toggleSearch} />
         </div>
 
         {/* Mobile: icons (logged in) + toggle */}
         <div className="flex items-center gap-1 lg:hidden">
-          {authReady &&
-            (isLoggedIn ? (
-              <UserIcons mobile onNavigate={close} searchOpen={searchOpen} onToggleSearch={toggleSearch} />
-            ) : (
-              <SearchToggle open={searchOpen} onToggle={toggleSearch} />
-            ))}
+          <UserIcons user={user} mobile onNavigate={close} searchOpen={searchOpen} onToggleSearch={toggleSearch} />
 
           <button
             type="button"

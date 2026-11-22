@@ -53,7 +53,7 @@ export default function FounderSection() {
             </Link>
 
             <Link
-              href="/contact"
+              href="/founder"
               className="group inline-flex items-center gap-2 text-xs text-black transition-colors hover:text-[#C9A445] sm:text-sm"
             >
               <span className="border-b border-black transition-colors group-hover:border-[#C9A445]">

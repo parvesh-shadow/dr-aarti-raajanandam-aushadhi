@@ -13,8 +13,7 @@ const TAGLINE =
   "Thoughtful Ayurvedic formulations for modern, everyday wellbeing";
 const NEWSLETTER_TITLE = "Stay in touch";
 const NEWSLETTER_TEXT = "Receive seasonal wisdom, rituals and product notes.";
-const ADDRESS =
-  "Shop No. 12, Anand Wellness Plaza, MG Road, Near City Hospital, Pune, Maharashtra – 411001, India";
+const ADDRESS = "Raajanandam Aushadhi Rishikesh Uttrakhand";
 
 const COLUMNS = [
   {

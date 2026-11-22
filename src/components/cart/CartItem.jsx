@@ -21,9 +21,13 @@ export default function CartItem({ item, onQtyChange, onRemove }) {
           imageClassName="object-cover"
           className="h-full w-full bg-white"
         />
-        {inStock && (
+        {inStock ? (
           <span className="absolute bottom-0 bg-white rounded-xs px-1 py-0.5 right-0 z-10 text-xs sm:textsm font-medium text-black">
             In Stock
+          </span>
+        ) : (
+          <span className="absolute bottom-0 bg-white rounded-xs px-1 py-0.5 right-0 z-10 text-xs sm:textsm font-semibold text-red-600">
+            Out of Stock
           </span>
         )}
       </div>

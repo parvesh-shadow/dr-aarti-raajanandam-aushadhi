@@ -44,6 +44,7 @@ export default function CartContent() {
           subtotal={subtotal}
           discountPercent={discountPercent}
           onApplyCoupon={applyCoupon}
+          blocked={items.some((i) => !i.inStock || i.qty > i.stock)}
         />
       </section>
 

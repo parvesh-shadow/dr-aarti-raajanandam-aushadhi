@@ -6,7 +6,7 @@ import { ArrowRight, Package, ShieldCheck, Tag } from "lucide-react";
 
 const format = (n) => `₹${n.toLocaleString("en-IN")}`;
 
-export default function OrderSummary({ subtotal, shipping = 0, discountPercent, onApplyCoupon }) {
+export default function OrderSummary({ subtotal, shipping = 0, discountPercent, onApplyCoupon, blocked = false }) {
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
 
@@ -85,13 +85,27 @@ export default function OrderSummary({ subtotal, shipping = 0, discountPercent, 
         <span>{format(total)}</span>
       </div>
 
-      <Link
-        href="/checkout"
-        className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
-      >
-        Proceed to Checkout
-        <ArrowRight className="h-4 w-4" aria-hidden="true" />
-      </Link>
+      {blocked ? (
+        <>
+          <p role="alert" className="mt-4 text-xs text-red-600 sm:text-sm">
+            Some items are out of stock or not available in this quantity. Please remove or reduce them to continue.
+          </p>
+          <span
+            aria-disabled="true"
+            className="mt-2 inline-flex w-full cursor-not-allowed items-center justify-center gap-2 bg-gray-300 px-4 py-3 text-xs text-gray-600 sm:text-sm"
+          >
+            Proceed to Checkout
+          </span>
+        </>
+      ) : (
+        <Link
+          href="/checkout"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+        >
+          Proceed to Checkout
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      )}
 
       <p className="mt-3 flex items-center justify-center gap-1 text-sm font-medium text-gray-800">
         <ShieldCheck className="h-3 w-3" strokeWidth={2} aria-hidden="true" />

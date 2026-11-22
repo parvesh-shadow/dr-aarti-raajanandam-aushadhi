@@ -91,7 +91,7 @@ const productBase = z.object({
   mrp: z.coerce.number().min(0).max(10000000).optional(),
   stock: z.coerce.number().int("Stock must be a whole number.").min(0).max(1000000).optional(),
 
-  images: z.array(path).max(8).optional(),
+  images: z.array(path).max(5).optional(),
   brochureHref: optionalPath.optional(),
 
   about: text(3000).optional(),

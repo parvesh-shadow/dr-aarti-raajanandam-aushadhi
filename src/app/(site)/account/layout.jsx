@@ -9,17 +9,20 @@ import {
   User,
   Box,
   Truck,
+  CalendarDays,
   Lock,
   LogOut,
   ChevronRight,
   X,
 } from "lucide-react";
+import RequireLogin from "@/components/auth/RequireLogin";
 import heroImg from "@/assets/pageimage.jpg";
 
 const links = [
   { label: "Dashboard", href: "/account", icon: Leaf },
   { label: "My Profile", href: "/account/profile", icon: User },
   { label: "My Orders", href: "/account/order", icon: Box },
+  { label: "My Appointments", href: "/account/appointments", icon: CalendarDays },
   { label: "Saved Address", href: "/account/address", icon: Truck },
   {
     label: "Password & Security",
@@ -110,6 +113,14 @@ function SidebarContent({ pathname, user, onNavigate }) {
 }
 
 export default function AccountLayout({ children }) {
+  return (
+    <RequireLogin>
+      <AccountShell>{children}</AccountShell>
+    </RequireLogin>
+  );
+}
+
+function AccountShell({ children }) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [user, setUser] = useState(null);

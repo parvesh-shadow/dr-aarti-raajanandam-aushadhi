@@ -5,9 +5,11 @@ import Link from "next/link";
 import Product from "@/components/shared/Product";
 import { addToCart } from "@/lib/checkoutStore";
 import { useWishlistIds } from "@/lib/wishlistStore";
+import { useShopReady } from "@/lib/shopSession";
 
 // Wishlist ke ids ko public product API se hydrate karke Product card me dikhata hai.
 export default function WishlistContent() {
+  const ready = useShopReady(); // login status check hone tak wishlist "empty" na dikhe
   const ids = useWishlistIds();
   const key = ids.join(",");
   const [products, setProducts] = useState({}); // id -> card product
@@ -62,7 +64,7 @@ export default function WishlistContent() {
 
   const items = ids.map((id) => products[id]).filter(Boolean);
 
-  if (loading && items.length === 0 && ids.length > 0) return null;
+  if (!ready || (loading && items.length === 0 && ids.length > 0)) return null;
 
   if (items.length === 0) {
     return (

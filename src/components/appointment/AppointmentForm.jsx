@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Check } from "lucide-react";
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
 
@@ -59,7 +59,7 @@ function validate(values) {
 
   if (!values.date) errors.date = "Please select a date.";
   else {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("en-CA"); // local date
     if (values.date < today) errors.date = "Date cannot be in the past.";
   }
 
@@ -85,6 +85,27 @@ export default function AppointmentForm() {
   const [success, setSuccess] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Logged-in user ho to naam / email / mobile pehle se bhar do (khaali fields par hi)
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const u = d?.user;
+        if (!alive || !u) return;
+        setValues((prev) => ({
+          ...prev,
+          name: prev.name || u.name || "",
+          email: prev.email || u.email || "",
+          mobile: prev.mobile || (u.phone || "").replace(/\D/g, "").slice(-10),
+        }));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,7 +134,7 @@ export default function AppointmentForm() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       setSuccess(data.message || "Thank you. We have received your request.");
-      setValues(INITIAL);
+      setValues((v) => ({ ...INITIAL, name: v.name, email: v.email, mobile: v.mobile }));
     } catch (err) {
       setSubmitError(err instanceof TypeError ? "Network error. Please check your connection." : err.message);
     } finally {

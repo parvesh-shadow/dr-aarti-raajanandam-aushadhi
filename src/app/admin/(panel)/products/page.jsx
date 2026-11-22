@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/shared/Pagination";
 import { Pencil, Trash2 } from "lucide-react";
 
 const MSG = {
@@ -240,28 +241,8 @@ export default function AdminProductsPage() {
           </tbody>
         </table>
       </div>
+      <Pagination className="mt-4" page={page} pages={data.pages} total={data.total} limit={20} onChange={setPage} disabled={loading} />
 
-      {data.pages > 1 && (
-        <div className="mt-4 flex items-center gap-3 text-sm">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="border border-black px-3 py-1 disabled:opacity-40"
-          >
-            Prev
-          </button>
-          <span>
-            Page {page} of {data.pages}
-          </span>
-          <button
-            disabled={page >= data.pages}
-            onClick={() => setPage((p) => p + 1)}
-            className="border border-black px-3 py-1 disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
-      )}
 
       {target && (
         <div

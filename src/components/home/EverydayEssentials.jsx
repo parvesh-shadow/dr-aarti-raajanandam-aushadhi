@@ -19,8 +19,9 @@ export default async function EverydayEssentials() {
       className="mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-20"
     >
       <TitleDescription
-        heading="Everyday essentials"
-        description="Explore thoughtfully selected Ayurvedic products designed to complement your daily wellness routine and bring traditional care into modern everyday living."
+        heading="Reproductive Wellness"
+       // description="Explore thoughtfully selected Ayurvedic products designed to complement your daily wellness routine and bring traditional care into modern everyday living."
+        description="Explore thoughtfully selected Ayurvedic products for female and male reproductive health, fertility and overall wellness."
         buttonText="See All"
         buttonHref="/products"
         align="left"
