@@ -6,7 +6,7 @@ import whatsappIcon from "@/assets/whatsapp.webp";
 
 // Number: country code ke saath, + ya space ke bina.
 // Better: .env.local mein NEXT_PUBLIC_WHATSAPP_NUMBER=91XXXXXXXXXX rakho.
-const WHATSAPP_NUMBER =  "8057091291";
+const WHATSAPP_NUMBER = "918057091291";
 const PREFILLED_MESSAGE =
   "Hello Raajanandam Aushadhi, I have a question about your products / my order.";
 
@@ -14,12 +14,20 @@ const CHAT_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(PRE
 
 export default function WhatsAppButton() {
   const [open, setOpen] = useState(false);
+  const onEnter = (e) => {
+    if (e.pointerType === "mouse") setOpen(true);
+  };
+  const onLeave = (e) => {
+    if (e.pointerType === "mouse") setOpen(false);
+  };
 
   return (
     <div
       className="pointer-events-none fixed bottom-5 right-4 z-50 flex flex-col items-end gap-3 sm:right-6"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      // onMouseEnter={() => setOpen(true)}
+      // onMouseLeave={() => setOpen(false)}
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
     >
       {/* chat card */}
       <div
@@ -31,11 +39,17 @@ export default function WhatsAppButton() {
         }`}
       >
         <div className="mb-1 flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-[#25D366]" aria-hidden="true" />
-          <p className="text-sm font-semibold text-[#1f2a44]">Raajanandam Aushadhi</p>
+          <span
+            className="h-2 w-2 rounded-full bg-[#25D366]"
+            aria-hidden="true"
+          />
+          <p className="text-sm font-semibold text-[#1f2a44]">
+            Raajanandam Aushadhi
+          </p>
         </div>
         <p className="text-sm leading-snug text-slate-600">
-          Questions about our products, orders or delivery? Message us on WhatsApp.
+          Questions about our products, orders or delivery? Message us on
+          WhatsApp.
         </p>
       </div>
 

@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import TitleDescription from "@/components/shared/TitleDescription";
-import instagramPreview from "@/assets/instaimage.jpg";
-import { findSocial, getSiteSettings } from "@/lib/siteSettings";
+
+const INSTAGRAM_URL = "https://www.instagram.com/raajanandam_aushadhi_/";
+const INSTAGRAM_EMBED = "https://www.instagram.com/raajanandam_aushadhi_/embed";
 
 function InstagramIcon({ className }) {
   return (
@@ -24,11 +24,7 @@ function InstagramIcon({ className }) {
   );
 }
 
-export default async function Instagram() {
-  const instagramUrl = findSocial(await getSiteSettings(), "instagram")?.url;
-  // Admin ne Instagram link nahi diya to ye section nahi dikhega
-  if (!instagramUrl) return null;
-
+export default function Instagram() {
   return (
     <section
       aria-labelledby="instagram-heading"
@@ -42,18 +38,19 @@ export default async function Instagram() {
         contentClassName="max-w-xl"
       />
 
-      <div className="mx-auto mt-8 w-full max-w-[400px] border-2 border-[#C5A84C] sm:max-w-[380px]">
-        <Image
-          src={instagramPreview}
-          alt="Preview of the raajanandam_aushadhi Instagram profile"
-          sizes="(min-width: 640px) 280px, 240px"
-          className="h-auto w-full"
+      <div className="mx-auto mt-8 h-[560px] w-full max-w-[400px] overflow-hidden rounded-2xl border-4 border-[#C5A84C] bg-white shadow-lg sm:max-w-[380px]">
+        <iframe
+          src={INSTAGRAM_EMBED}
+          title="Instagram Feed"
+          loading="lazy"
+          scrolling="yes"
+          className="h-full w-full border-0"
         />
       </div>
 
       <div className="mt-8 flex justify-center">
         <Link
-          href={instagramUrl}
+          href={INSTAGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 border border-black bg-white px-5 py-2.5 font-medium text-xs text-black transition-colors hover:border-[#A88C35] hover:bg-[#C5A84C] hover:text-white active:bg-[#A88C35] sm:text-sm"

@@ -149,7 +149,9 @@ function Lightbox({ images, name, active, onSelect, onClose }) {
               className="shrink-0"
               style={
                 wide
-                  ? { flex: "1 1 0%", minHeight: 0 }
+                  ? images.length === 1
+                    ? { width: 92, height: 92 }
+                    : { flex: "1 1 0%", minHeight: 0 }
                   : { flex: "0 0 auto", width: 64, height: 64 }
               }
             >
@@ -239,10 +241,13 @@ export default function ProductGallery({
         </div>
       </div>
 
-      {/* Thumbnails */}
-      <ul className="mx-auto grid w-full max-w-[480px] grid-cols-5 gap-2 lg:mx-0 lg:flex lg:w-[106px] lg:max-w-none lg:shrink-0 lg:flex-col lg:self-stretch">
+      {/* Thumbnails: desktop par height 550px (main image ke barabar), 5 slots + 4 gaps (4 x 8px = 32px) */}
+      <ul className="mx-auto grid w-full max-w-[480px] grid-cols-5 gap-2 lg:mx-0 lg:flex lg:h-[550px] lg:w-[106px] lg:max-w-none lg:shrink-0 lg:flex-col">
         {thumbs.map((src, i) => (
-          <li key={i} className="aspect-[110/100] lg:aspect-auto lg:min-h-0 lg:flex-1">
+          <li
+            key={i}
+            className="aspect-[110/100] lg:aspect-auto lg:h-[calc((100%-32px)/5)] lg:min-h-0 lg:flex-none"
+          >
             <button
               type="button"
               onClick={() => setActive(i)}

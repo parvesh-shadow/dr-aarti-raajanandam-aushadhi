@@ -33,18 +33,21 @@ export default function WhyChooseUs() {
   return (
     <section
       aria-labelledby="why-heading"
-      className="mx-auto py-10  sm:py-14 px-4 sm:px-6 lg:px-8 lg:px-20"
+      className="mx-auto px-4 py-10 sm:px-6 sm:py-14 lg:px-20"
     >
-      <h2 id="why-heading" className="xl:text-2xl lg:text-xl  font-semibold text-gray-800">
+      <h2
+        id="why-heading"
+        className="font-semibold text-gray-800 lg:text-xl xl:text-2xl"
+      >
         Why Choose Raaj Anandam Aushadhi?
       </h2>
 
       <div className="mt-2 grid gap-8 lg:mt-8 lg:grid-cols-2 lg:gap-12">
         <div className="lg:self-center">
-          <h3 className="max-w-xs xl:text-3xl lg:text-2xl font-semibold leading-snug text-black">
+          <h3 className="max-w-xs font-semibold leading-snug text-black lg:text-2xl xl:text-3xl">
             A More Thoughtful Way to Explore Ayurveda
           </h3>
-          <p className="mt-4 max-w-xs lg:text-base text-gray-600 sm:text-sm">
+          <p className="mt-4 max-w-xs text-gray-600 sm:text-sm lg:text-base">
             We bring together Ayurvedic knowledge, carefully presented products
             and a simple digital shopping experience.
           </p>
@@ -54,7 +57,10 @@ export default function WhyChooseUs() {
           {ITEMS.map(({ title, content }, i) => {
             const isOpen = openIndex === i;
             return (
-              <li key={title} className="border-b border-gray-200 last:border-b-0">
+              <li
+                key={title}
+                className="border-b border-gray-200 last:border-b-0"
+              >
                 <h4>
                   <button
                     type="button"
@@ -65,15 +71,16 @@ export default function WhyChooseUs() {
                     className="group flex w-full items-center gap-3 py-4 text-left"
                   >
                     <Leaf
-                      className="h-6 w-6 shrink-0 text-[#C5A84C]"
+                      className="h-6 w-6 shrink-0"
+                      style={{ color: "#166534" }} // dark green
                       strokeWidth={1.5}
                       aria-hidden="true"
                     />
-                    <span className="flex-1 text-[18px] font-medium text-gray-800 transition-colors group-hover:text-[#A88C35] sm:text-sm">
+                    <span className="flex-1 text-[18px] font-medium text-gray-800 transition-colors group-hover:text-[#A88C35] sm:text-base">
                       {title}
                     </span>
                     <ChevronDown
-                      className={`h-4 w-4 shrink-0 text-gray-600 text-[16px] transition-transform duration-300 ${
+                      className={`h-4 w-4 shrink-0 text-gray-600 transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                       aria-hidden="true"
@@ -89,8 +96,8 @@ export default function WhyChooseUs() {
                     isOpen ? "grid-rows-[1fr] pb-4" : "grid-rows-[0fr]"
                   }`}
                 >
-                  <div className="overflow-hidden pl-7">
-                    <p className="text-xs text-gray-800 sm:text-sm">{content}</p>
+                  <div className="overflow-hidden pl-9">
+                    <p className="text-sm text-gray-800">{content}</p>
                   </div>
                 </div>
               </li>

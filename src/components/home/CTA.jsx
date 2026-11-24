@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function CTA() {
   return (
-    <section aria-labelledby="cta-heading" className="w-full bg-[#C5A84C]">
+    <section aria-labelledby="cta-heading" className="w-full"  style={{ backgroundColor: "#6B1D2A" }}>
       <div className="flex w-full flex-col gap-5 px-4 py-12 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-20">
         <div className="max-w-xl">
           <h2

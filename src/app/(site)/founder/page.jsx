@@ -196,7 +196,7 @@ export default function Founder() {
       </section>
 
       {/* ========================= STATS ========================= */}
-      <section className="bg-[#1A1A1A] py-14 lg:py-16">
+      <section className=" py-14 lg:py-16" style={{ backgroundColor: "#6B1D2A" }}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <SectionHeading center light>
             Clinical Experience at a Glance
@@ -296,7 +296,7 @@ export default function Founder() {
       </section>
 
       {/* ========================= CTA ========================= */}
-      <section className="bg-[#C5A84C] py-12 lg:py-14">
+      <section className=" py-12 lg:py-14" style={{ backgroundColor: "#6B1D2A" }}>
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
           <h2 className="text-2xl font-semibold text-white sm:text-3xl md:text-4xl ">
             Begin Your Parenthood Journey
