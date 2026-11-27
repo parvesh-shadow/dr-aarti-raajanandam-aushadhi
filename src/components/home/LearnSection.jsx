@@ -141,66 +141,52 @@
 //     </section>
 //   );
 // }
-import {
-  CalendarDays,
-  Sprout,
-  Apple,
-  Droplets,
-  Moon,
-  Stethoscope,
-} from "lucide-react";
+import Image from "next/image";
 import TitleDescription from "@/components/shared/TitleDescription";
-import FeaturedCard from "@/components/shared/FeaturedCard";
 
-// iconColor = icon ka rang, iconBg = icon ke peeche halka background
+import imgFertility from "@/assets/learn-fertility.jpeg";
+import imgPreconception from "@/assets/learn-preconception.jpeg";
+import imgNutrition from "@/assets/learn-nutrition.jpeg";
+import imgMenstrual from "@/assets/learn-menstrual.jpeg";
+import imgStress from "@/assets/learn-stress.jpeg";
+import imgSupport from "@/assets/learn-support.jpeg";
+
 const TOPICS = [
   {
     heading: "Understanding Your Fertility",
     description:
       "Learn how the menstrual cycle, ovulation, and fertile window relate to conception.",
-    icon: CalendarDays,
-    iconColor: "#7C3AED", // violet
-    iconBg: "#EDE9FE",
+    image: imgFertility,
   },
   {
     heading: "Preconception Wellness",
     description:
       "Understand how nutrition, daily habits, sleep, movement, and overall wellness can support reproductive health.",
-    icon: Sprout,
-    iconColor: "#16A34A", // green
-    iconBg: "#DCFCE7",
+    image: imgPreconception,
   },
   {
     heading: "Nutrition for Fertility",
     description:
       "Explore the role of balanced nutrition and essential nutrients in supporting overall reproductive wellness.",
-    icon: Apple,
-    iconColor: "#DC2626", // red
-    iconBg: "#FEE2E2",
+    image: imgNutrition,
   },
   {
     heading: "Healthy Menstrual Cycles",
     description:
       "Learn about menstrual cycle patterns, tracking, and what changes may be worth discussing with a healthcare professional.",
-    icon: Droplets,
-    iconColor: "#E11D48", // rose
-    iconBg: "#FFE4E6",
+    image: imgMenstrual,
   },
   {
     heading: "Stress & Lifestyle",
     description:
       "Discover healthy approaches to managing stress, improving sleep, and building sustainable wellness routines.",
-    icon: Moon,
-    iconColor: "#4F46E5", // indigo
-    iconBg: "#E0E7FF",
+    image: imgStress,
   },
   {
     heading: "When to Seek Support",
     description:
       "When it may be helpful to speak with a qualified fertility or healthcare professional for personalized guidance.",
-    icon: Stethoscope,
-    iconColor: "#0D9488", // teal
-    iconBg: "#CCFBF1",
+    image: imgSupport,
   },
 ];
 
@@ -221,13 +207,25 @@ export default function LearnSection() {
       <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:mt-10 lg:grid-cols-3">
         {TOPICS.map((topic) => (
           <li key={topic.heading}>
-            <FeaturedCard
-              heading={topic.heading}
-              description={topic.description}
-              icon={topic.icon}
-              iconColor={topic.iconColor}
-              iconBg={topic.iconBg}
-            />
+            <article className="h-full border border-gray-200 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md">
+              {/* Image at icon size */}
+              <div className="relative h-14 w-14 overflow-hidden rounded-full">
+                <Image
+                  src={topic.image}
+                  alt=""
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
+              </div>
+
+              <h3 className="mt-4 text-lg font-semibold text-gray-800">
+                {topic.heading}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-[15px]">
+                {topic.description}
+              </p>
+            </article>
           </li>
         ))}
       </ul>

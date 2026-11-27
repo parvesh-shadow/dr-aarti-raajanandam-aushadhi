@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, X } from "lucide-react";
+import { FileText, Plus, Trash2, Upload, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/categories";
 
 const INPUT =
@@ -52,6 +52,52 @@ function Field({ label, as = "input", ...rest }) {
     <div>
       <label className={LABEL}>{label}</label>
       <Tag className={INPUT} {...rest} />
+    </div>
+  );
+}
+
+// Custom file upload card (asli input hidden hai, poora card clickable hai)
+function UploadBox({ title, subtitle, hint, maxMB, onChange, disabled, ...rest }) {
+  const [sizeError, setSizeError] = useState("");
+
+  const handleChange = (e) => {
+    const tooBig = [...(e.target.files || [])].some((f) => f.size > maxMB * 1024 * 1024);
+    if (tooBig) {
+      setSizeError(`File must be ${maxMB} MB or smaller.`);
+      e.target.value = "";
+      return;
+    }
+    setSizeError("");
+    onChange(e);
+  };
+
+  return (
+    <div className="mt-2">
+      <label
+        className={`flex items-center gap-3 rounded-2xl border border-gray-200 bg-white px-3 py-2 transition sm:gap-4 sm:px-4 focus-within:border-[#C5A84C] ${
+          disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:border-[#C5A84C]"
+        }`}
+      >
+        <input
+          type="file"
+          className="sr-only"
+          onChange={handleChange}
+          disabled={disabled}
+          {...rest}
+        />
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#C5A84C]/10 text-[#A88C35]">
+          <Upload size={18} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-slate-800">{title}</span>
+          <span className="block text-xs text-slate-500">{subtitle}</span>
+        </span>
+        <span className="shrink-0 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-slate-700">
+          Browse
+        </span>
+      </label>
+      <p className="mt-1.5 text-xs text-slate-500">{hint}</p>
+      {sizeError && <p role="alert" className="mt-1 text-sm text-red-600">{sizeError}</p>}
     </div>
   );
 }
@@ -130,7 +176,8 @@ export default function ProductForm({ productId }) {
   }
 
   const onImages = (e) => {
-    const files = e.target.files;
+    const input = e.target;
+    const files = input.files;
     if (!files?.length) return;
     run(async () => {
       const urls = [];
@@ -138,16 +185,17 @@ export default function ProductForm({ productId }) {
       const room = Math.max(0, 5 - form.images.length);
       for (const file of [...files].slice(0, room)) urls.push(await uploadImage(file));
       setForm((f) => ({ ...f, images: [...f.images, ...urls].slice(0, 5) }));
-    }).finally(() => (e.target.value = ""));
+    }).finally(() => (input.value = ""));
   };
 
   const onBrochure = (e) => {
-    const file = e.target.files?.[0];
+    const input = e.target;
+    const file = input.files?.[0];
     if (!file) return;
     run(async () => {
       const { url } = await upload("/api/admin/upload-brochure", "file", [file]);
       set("brochureHref", url);
-    }).finally(() => (e.target.value = ""));
+    }).finally(() => (input.value = ""));
   };
 
   async function onSubmit(e) {
@@ -251,24 +299,31 @@ export default function ProductForm({ productId }) {
       {/* 2. Images + brochure */}
       <Section title="Images & Brochure">
         <div>
-          <label className={LABEL}>Images (max 5, JPG/PNG/WEBP. Pehli image main hai)</label>
-          <input
-            type="file"
+          <p className={LABEL}>Images (max 5. Pehli image main hai)</p>
+          <UploadBox
+            title="Choose product images"
+            subtitle={form.images.length >= 5 ? "Maximum 5 images added" : "Select images from your device"}
+            hint="JPG, PNG or WEBP · Maximum 5 MB each"
+            maxMB={5}
             accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={onImages}
-            disabled={busy}
-            className="mt-1 block w-full text-sm"
+            disabled={busy || form.images.length >= 5}
           />
           {form.images.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-3">
-              {form.images.map((url) => (
+            <div className="mt-4 flex flex-wrap gap-4">
+              {form.images.map((url, i) => (
                 <div key={url} className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-24 w-24 rounded border border-gray-200 object-cover" />
+                  <img src={url} alt={`Product image ${i + 1}`} className="h-28 w-28 rounded-xl border border-gray-200 object-cover" />
+                  {i === 0 && (
+                    <span className="absolute bottom-1 left-1 rounded bg-[#C5A84C] px-1.5 py-0.5 text-xs text-white">
+                      Main
+                    </span>
+                  )}
                   <button
                     type="button"
-                    onClick={() => set("images", form.images.filter((i) => i !== url))}
+                    onClick={() => set("images", form.images.filter((img) => img !== url))}
                     aria-label="Remove image"
                     className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-[#E3122E] text-white"
                   >
@@ -281,17 +336,26 @@ export default function ProductForm({ productId }) {
         </div>
 
         <div>
-          <label className={LABEL}>Brochure (PDF, max 10 MB)</label>
-          <input type="file" accept="application/pdf" onChange={onBrochure} disabled={busy} className="mt-1 block w-full text-sm" />
+          <p className={LABEL}>Brochure</p>
+          <UploadBox
+            title="Choose brochure"
+            subtitle="Select a PDF from your device"
+            hint="PDF · Maximum 10 MB"
+            maxMB={10}
+            accept="application/pdf"
+            onChange={onBrochure}
+            disabled={busy}
+          />
           {form.brochureHref && (
-            <p className="mt-2 flex items-center gap-3 text-sm">
-              <a href={form.brochureHref} target="_blank" rel="noreferrer" className="text-[#A88C35] underline">
+            <div className="mt-3 flex items-center gap-3 rounded-xl border border-gray-200 p-3 text-sm">
+              <FileText size={20} className="shrink-0 text-[#A88C35]" />
+              <a href={form.brochureHref} target="_blank" rel="noreferrer" className="flex-1 text-[#A88C35] underline">
                 Current brochure
               </a>
               <button type="button" onClick={() => set("brochureHref", "")} className="text-[#E3122E]">
                 Remove
               </button>
-            </p>
+            </div>
           )}
         </div>
         {busy && <p className="text-sm text-gray-500">Uploading...</p>}
@@ -381,23 +445,26 @@ export default function ProductForm({ productId }) {
             <Field label="Name" value={item.name || ""} onChange={(e) => setRow("name", e.target.value)} />
             <Field label="Description" as="textarea" rows={2} value={item.description || ""} onChange={(e) => setRow("description", e.target.value)} />
             <div>
-              <label className={LABEL}>Image</label>
-              <input
-                type="file"
+              <p className={LABEL}>Image</p>
+              <UploadBox
+                title="Choose ingredient image"
+                subtitle="Select an image from your device"
+                hint="JPG, PNG or WEBP · Maximum 5 MB"
+                maxMB={5}
                 accept="image/jpeg,image/png,image/webp"
                 disabled={busy}
-                className="mt-1 block w-full text-sm"
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
+                  const input = e.target;
+                  const file = input.files?.[0];
                   if (!file) return;
                   run(async () => {
                     setRow("image", await uploadImage(file));
-                  }).finally(() => (e.target.value = ""));
+                  }).finally(() => (input.value = ""));
                 }}
               />
               {item.image && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.image} alt="" className="mt-2 h-20 w-20 rounded border border-gray-200 object-cover" />
+                <img src={item.image} alt={item.name || "Ingredient"} className="mt-3 h-28 w-28 rounded-xl border border-gray-200 object-cover" />
               )}
             </div>
           </>

@@ -1,6 +1,6 @@
 import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
 
-const IMAGE = "/fertilityjourney.jpg";
+const IMAGE = "/fertility-journey-v2.jpg";
 
 export default function FertilityJourney() {
   return (
