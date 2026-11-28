@@ -191,6 +191,15 @@ export default function Founder() {
               individualised treatment plans that integrate Ayurvedic principles with appropriate
               modern diagnostic methods.
             </Para>
+            <Link
+  href={BOOKING_LINK}
+  className="group mt-6 inline-flex w-full items-center justify-between gap-4 rounded-full bg-gradient-to-r from-[#C9A445] to-[#E0C469] py-2 pl-6 pr-2 text-sm font-semibold text-[#1f2a44] shadow-lg shadow-[#C9A445]/30 transition duration-300 hover:shadow-xl hover:shadow-[#C9A445]/40 sm:w-auto sm:text-base"
+>
+  <span>Book Your Appointment with Dr. Arti Panwar Today</span>
+  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1f2a44] text-white transition-transform duration-300 group-hover:translate-x-1">
+    <ArrowRight className="h-5 w-5" aria-hidden="true" />
+  </span>
+</Link>
           </div>
         </div>
       </section>
@@ -295,28 +304,7 @@ export default function Founder() {
         </div>
       </section>
 
-      {/* ========================= CTA ========================= */}
-      <section className=" py-12 lg:py-14" style={{ backgroundColor: "#6B1D2A" }}>
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
-          <h2 className="text-2xl font-semibold text-white sm:text-3xl md:text-4xl ">
-            Begin Your Parenthood Journey
-          </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-6 text-white/90 sm:text-base sm:leading-6">
-            Whether you are struggling with infertility, PCOS/PCOD, irregular periods, or require
-            specialised high-risk pregnancy care, take the first step towards understanding your
-            health with professional guidance.
-          </p>
-          <Link
-            href={BOOKING_LINK}
-            className="mt-8 inline-flex items-center gap-2 bg-[#1f2a44] px-6 py-3.5 text-sm font-medium text-white shadow-lg transition hover:bg-[#16203a] sm:px-8 sm:py-4 sm:text-base"
-          >
-            Book Your Appointment with Dr. Arti Panwar Today
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-
-          </Link>
-         <p className="mx-auto mt-5 max-w-4xl text-base leading-6 text-white/90 sm:text-base sm:leading-6">Individual treatment outcomes may vary. Clinical figures should be verified against practice records before publication. Treatment recommendations depend on individual assessment.</p>
-        </div>
-      </section>
+    
     </main>
   );
 }

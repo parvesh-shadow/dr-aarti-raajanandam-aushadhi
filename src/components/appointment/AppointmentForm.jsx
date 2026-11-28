@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
-import ImagePlaceholder from "@/components/shared/ImagePlaceholder";
-
-
-const BG_IMAGE = "/appointment.jpg";
+import Image from "next/image";
+import { ArrowRight, Check, ChevronDown } from "lucide-react";
+import sideImage from "@/assets/appointment-side.jpg";
 
 const APPOINTMENT_TYPES = ["Online consultation", "In-clinic consultation", "Follow-up consultation"];
 const TIME_SLOTS = [
@@ -79,6 +77,19 @@ function FieldError({ id, message }) {
   );
 }
 
+// Select ke right side par chevron icon
+function SelectWrap({ children }) {
+  return (
+    <div className="relative">
+      {children}
+      <ChevronDown
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-800"
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
+
 export default function AppointmentForm() {
   const [values, setValues] = useState(INITIAL);
   const [errors, setErrors] = useState({});
@@ -101,7 +112,7 @@ export default function AppointmentForm() {
           mobile: prev.mobile || (u.phone || "").replace(/\D/g, "").slice(-10),
         }));
       })
-      .catch(() => {});
+      .catch(() => { });
     return () => {
       alive = false;
     };
@@ -143,32 +154,25 @@ export default function AppointmentForm() {
   };
 
   const fieldClass = (name) =>
-    `mt-1 w-full bg-gray-100 px-3 py-2.5 text-xs text-black placeholder:text-gray-500 focus:outline-none focus:ring-1 sm:text-sm lg:text-[15px] ${
-      errors[name] ? "ring-1 ring-red-500" : "focus:ring-[#C5A84C]"
+    `mt-1 block w-full border bg-[#F4F4F4] px-3 py-2.5 text-xs text-black placeholder:text-gray-500 focus:outline-none focus:ring-1 sm:text-sm lg:text-[15px] ${errors[name] ? "border-red-500 ring-1 ring-red-500" : "border-gray-200 focus:ring-[#C5A84C]"
     }`;
 
-  const labelClass = "text-xs font-medium text-black sm:text-sm ";
+  const selectClass = (name) => `${fieldClass(name)} appearance-none pr-9`;
+
+  const labelClass = "text-xs font-medium text-black sm:text-sm";
+
+  const cardClass = "bg-white shadow-[0_4px_24px_rgba(0,0,0,0.08)]";
 
   return (
-    <section aria-labelledby="appointment-heading" className="relative overflow-hidden">
-      <div className="absolute inset-0">
-        <ImagePlaceholder
-          src={BG_IMAGE}
-          label="Appointment background"
-          priority
-          sizes="100vw"
-          className="h-full w-full"
-        />
-      </div>
-
-      <div className="relative mx-auto grid  gap-5 xl:gap-20 py-8  sm:py-8 lg:grid-cols-2 lg:items-start sm:px-6 lg:px-8 lg:px-20 xl:px-40">
+    <section aria-labelledby="appointment-heading" className="bg-white">
+      <div className="mx-auto grid gap-6 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-2 lg:items-stretch lg:gap-8 lg:px-20 xl:gap-12 xl:px-40">
         {/* Form card */}
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="bg-white p-5 shadow-sm sm:p-6"
+          className={`${cardClass} p-5 sm:p-6`}
         >
-          <h2 id="appointment-heading" className="text-[28px] font-medium text-black">
+          <h2 id="appointment-heading" className="text-[22px] font-medium text-black sm:text-2xl">
             Request an Appointment
           </h2>
 
@@ -224,20 +228,22 @@ export default function AppointmentForm() {
 
             <div>
               <label htmlFor="appointmentType" className={labelClass}>Appointment Type</label>
-              <select
-                id="appointmentType"
-                name="appointmentType"
-                value={values.appointmentType}
-                onChange={handleChange}
-                aria-invalid={!!errors.appointmentType}
-                aria-describedby={errors.appointmentType ? "appointmentType-error" : undefined}
-                className={fieldClass("appointmentType")}
-              >
-                <option value="">Appointment type</option>
-                {APPOINTMENT_TYPES.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
+              <SelectWrap>
+                <select
+                  id="appointmentType"
+                  name="appointmentType"
+                  value={values.appointmentType}
+                  onChange={handleChange}
+                  aria-invalid={!!errors.appointmentType}
+                  aria-describedby={errors.appointmentType ? "appointmentType-error" : undefined}
+                  className={selectClass("appointmentType")}
+                >
+                  <option value="">Appointment type</option>
+                  {APPOINTMENT_TYPES.map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+              </SelectWrap>
               <FieldError id="appointmentType-error" message={errors.appointmentType} />
             </div>
 
@@ -259,40 +265,44 @@ export default function AppointmentForm() {
 
               <div>
                 <label htmlFor="time" className={labelClass}>Preferred Time</label>
-                <select
-                  id="time"
-                  name="time"
-                  value={values.time}
-                  onChange={handleChange}
-                  aria-invalid={!!errors.time}
-                  aria-describedby={errors.time ? "time-error" : undefined}
-                  className={fieldClass("time")}
-                >
-                  <option value="">Select Preferred Time</option>
-                  {TIME_SLOTS.map((slot) => (
-                    <option key={slot} value={slot}>{slot}</option>
-                  ))}
-                </select>
+                <SelectWrap>
+                  <select
+                    id="time"
+                    name="time"
+                    value={values.time}
+                    onChange={handleChange}
+                    aria-invalid={!!errors.time}
+                    aria-describedby={errors.time ? "time-error" : undefined}
+                    className={selectClass("time")}
+                  >
+                    <option value="">Select Preferred Time</option>
+                    {TIME_SLOTS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </SelectWrap>
                 <FieldError id="time-error" message={errors.time} />
               </div>
             </div>
 
             <div>
               <label htmlFor="reason" className={labelClass}>Reason for Appointment</label>
-              <select
-                id="reason"
-                name="reason"
-                value={values.reason}
-                onChange={handleChange}
-                aria-invalid={!!errors.reason}
-                aria-describedby={errors.reason ? "reason-error" : undefined}
-                className={fieldClass("reason")}
-              >
-                <option value="">Select reason</option>
-                {REASONS.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
+              <SelectWrap>
+                <select
+                  id="reason"
+                  name="reason"
+                  value={values.reason}
+                  onChange={handleChange}
+                  aria-invalid={!!errors.reason}
+                  aria-describedby={errors.reason ? "reason-error" : undefined}
+                  className={selectClass("reason")}
+                >
+                  <option value="">Select reason</option>
+                  {REASONS.map((item) => (
+                    <option key={item} value={item}>{item}</option>
+                  ))}
+                </select>
+              </SelectWrap>
               <FieldError id="reason-error" message={errors.reason} />
             </div>
 
@@ -315,7 +325,7 @@ export default function AppointmentForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="disabled:opacity-60 mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs uppercase text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] sm:text-sm"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 bg-[#C5A84C] px-4 py-3 text-xs uppercase text-white transition-colors hover:bg-[#A88C35] active:bg-[#A88C35] disabled:opacity-60 sm:text-sm"
           >
             Submit Appointment
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -330,23 +340,43 @@ export default function AppointmentForm() {
         </form>
 
         {/* Info card */}
-        <aside className="bg-white p-6 flex flex-col justify-center xl:gap-4 gap-1 sm:p-10 lg:self-stretch">
-          <h2 className="text-[24px] lg:text-[32px] xl:text-[54px] pr-4 font-medium lg:leading-10 leading-8  xl:leading-15 text-gray-800">
-            Personalized guidance, from the comfort of home.
-          </h2>
-          <p className="mt-6 text-sm text-gray-800 sm:text-base xl:text-[18px]">
-            Share your concerns with Dr. Arti Panwar, MS — Obstetrician &amp;
-            Gynaecologist, in a focused one-to-one digital consultation.
-          </p>
+        <aside className={`${cardClass} flex flex-col p-5 sm:p-6`}>
+          {/* Image */}
+          <div className="relative aspect-[488/280] w-full overflow-hidden rounded-2xl">
+            <Image
+              src={sideImage}
+              alt="Ayurvedic herbs and spices"
+              fill
+              priority
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              className="object-cover"
+            />
+          </div>
 
-          <ul className="mt-8 space-y-3">
-            {POINTS.map((point) => (
-              <li key={point} className="flex items-start gap-3 text-xs text-black font-semibold sm:text-sm xl:text-base">
-                <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                {point}
-              </li>
-            ))}
-          </ul>
+          {/* Content */}
+          <div className="flex flex-1 flex-col justify-between gap-6 px-1 pb-2 pt-6 sm:px-3">
+            <div>
+              <h2 className="text-[30px] font-medium leading-[1.15] text-black sm:text-[36px] xl:text-[46px]">
+                Personalized guidance, from the comfort of home.
+              </h2>
+              <p className="mt-5 text-base text-gray-800 sm:text-lg">
+                Share your concerns with Dr. Arti Panwar, MS — Obstetrician &amp;
+                Gynaecologist, in a focused one-to-one digital consultation.
+              </p>
+            </div>
+
+            <ul className="space-y-4">
+              {POINTS.map((point) => (
+                <li
+                  key={point}
+                  className="flex items-start gap-3 text-base font-medium text-black sm:text-lg"
+                >
+                  <Check className="mt-1 h-5 w-5 shrink-0" aria-hidden="true" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </div>
         </aside>
       </div>
     </section>
