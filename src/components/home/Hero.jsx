@@ -7,26 +7,30 @@ import Image from "next/image";
 import hero1 from "@/assets/ban1.jpeg";
 import hero2 from "@/assets/ban2.jpeg";
 import hero3 from "@/assets/ban3.jpeg";
-// import hero4 from "@/assets/ban4.jpeg";
+import hero4 from "@/assets/ban4.jpeg";
 
 
 const SLIDES = [
+   {
+    image: hero1,
+    alt: "Embrace the Goodness of Ayurveda. Mediwine syrup, Vajromax Gold and Fem Rasayan wellness products",
+  },
+
+    {
+    image: hero2,
+    alt: "Ayurvedic Support for Every Stage of Life. Root Tricks hair care capsules and Shatavar tablets",
+  },
+  
   {
     image: hero3,
     alt: "Your Journey to Parenthood, Supported Naturally. Vajromax Gold and Fem Rasayan Ayurvedic fertility support tablets",
   },
-  {
-    image: hero2,
-    alt: "Embrace the Goodness of Ayurveda. Mediwine syrup, Vajromax Gold and Fem Rasayan wellness products",
-  },
-  {
-    image: hero1,
+ 
+
+   {
+    image: hero4,
     alt: "Ayurvedic Support for Every Stage of Life. Root Tricks hair care capsules and Shatavar tablets",
   },
-  //  {
-  //   image: hero4,
-  //   alt: "Ayurvedic Support for Every Stage of Life. Root Tricks hair care capsules and Shatavar tablets",
-  // },
 ];
 
 const AUTOPLAY_MS = 2000;
